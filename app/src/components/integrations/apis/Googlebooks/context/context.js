@@ -1,6 +1,7 @@
 import { useEffect, createContext, useReducer } from "react";
 import cryptoJS from "crypto-js";
 import axios from "axios";
+
 import Reducer from "./reducer";
 //b3b93acc
 const API = `https://www.googleapis.com/books/v1/volumes?`;
@@ -46,24 +47,12 @@ export const GooglebooksContextProvider = ({ children }) => {
     });
   };
 
-  const getApiKey = async () => {
-    const response = await axios.post(
-      `http://localhost:8000/api/v1/apiconfig/key`,
-      { apiSlug: "Googlebooks" },
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
-    const hashedData = response.data.data.ApiKey.keys[0].key;
-    console.log(hashedData);
-    const apiKey = cryptoJS.AES.decrypt(
-      hashedData,
-      "3DNFRo2no81p8KUEIN47B%$^&6c4876"
-    ).toString(cryptoJS.enc.Utf8);
+  const getApiKey = async (axiosPrivate) => {
+    const response = await axiosPrivate.post(`/apiconfig/key`, {
+      apiSlug: "Googlebooks",
+    });
+    const apiKey = response.data.data.ApiKey.keys[0].key;
+
     fetachAPI(`${API}q=${state.query}&key=${apiKey}&maxResults=5`);
   };
 

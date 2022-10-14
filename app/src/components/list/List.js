@@ -1,15 +1,16 @@
 import React, { useState, useContext, useEffect } from "react";
 import { ApiAuthContext } from "../../context/apiAuthContext/ApiAuthContext";
 import { DataApiContext } from "../../context/dataApiContext/DataApiContext";
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import {
-  createApiAuth,
-  getApiAuth,
-  deleteApiAuth,
+  CreateApiAuth,
+  GetApiAuth,
+  DeleteApiAuth,
 } from "../../context/apiAuthContext/apiCalls";
 import {
-  createApiKey,
-  getApiKey,
-  deleteApiKey,
+  CreateApiKey,
+  GetApiKey,
+  DeleteApiKey,
 } from "../../context/dataApiContext/apiCalls";
 import {
   Box,
@@ -19,7 +20,10 @@ import {
   SimpleGrid,
   Stack,
   Center,
-  Heading,
+  Image,
+  AlertIcon,
+  AlertDescription,
+  Alert,
   Text,
   Avatar,
   useBreakpointValue,
@@ -87,7 +91,7 @@ const Stat = (props) => {
       {...boxProps}
     >
       <Stack mt={1} direction={"row"} spacing={4} align={"center"}>
-        <Avatar src={image} size={"md"} alt={"Author"} />
+        <Image boxSize="40px" objectFit="cover" src={image} alt="Dan Abramov" />
         <Stack direction={"column"} spacing={0} fontSize={"sm"}>
           <Text fontSize="2xl">{name}</Text>
         </Stack>
@@ -96,34 +100,46 @@ const Stat = (props) => {
   );
 };
 const NotionAuth = ({ slug }) => {
-  const { dispatch, isFetching, apiAuth } = useContext(ApiAuthContext);
+  const axiosPrivate = useAxiosPrivate();
+  const { dispatch, error, apiAuth } = useContext(ApiAuthContext);
   useEffect(() => {
-    getApiAuth({ apiSlug: slug }, dispatch);
+    GetApiAuth({ apiSlug: slug }, axiosPrivate, dispatch);
   }, [dispatch, slug]);
   const [showKey, setShowKey] = useState(false);
   const [showId, setShowId] = useState(false);
   const handleClickKey = () => setShowKey(!showKey);
   const handleClickId = () => setShowId(!showId);
-  const [auth, setAuth] = useState({
-    databaseId: "",
-    apiKey: "",
-    apiSlug: slug,
-  });
-  const handleChange = (e) => {
-    const name = e.target.name;
-    const value = e.target.value;
-    setAuth({ ...auth, [name]: value });
+  const [load, setLoad] = useState(false);
+  // const [auth, setAuth] = useState({
+  //   databaseId: "",
+  //   apiKey: "",
+  //   apiSlug: slug,
+  // });
+  const [databaseId, setDatabaseId] = useState("");
+  const [apiKey, setApiKey] = useState("");
 
-    console.log(auth);
-  };
-  const handleSubmit = (e) => {
+  // const handleChange = (e) => {
+  //   const name = e.target.name;
+  //   const value = e.target.value;
+  //   setAuth({ ...auth, [name]: value });
+
+  //   console.log(auth);
+  // };
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("submitted");
-    createApiAuth(auth, dispatch);
-    setAuth({ databaseId: "", apiKey: "" });
+    setLoad(true);
+    await CreateApiAuth(
+      { apiKey, databaseId, apiSlug: slug },
+      axiosPrivate,
+      dispatch
+    );
+    setLoad(false);
+    setDatabaseId("");
+    setApiKey("");
   };
   const handleDelete = () => {
-    deleteApiAuth({ apiSlug: slug }, dispatch);
+    DeleteApiAuth({ apiSlug: slug }, axiosPrivate, dispatch);
   };
   return (
     <Box
@@ -156,8 +172,8 @@ const NotionAuth = ({ slug }) => {
               type={showKey ? "text" : "password"}
               placeholder="Enter Integration Key"
               name="apiKey"
-              value={auth.apiKey}
-              onChange={handleChange}
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
             />
             <InputRightElement width="4.5rem">
               <Button h="1.75rem" size="sm" onClick={handleClickKey}>
@@ -171,8 +187,8 @@ const NotionAuth = ({ slug }) => {
               type={showId ? "text" : "password"}
               placeholder="Enter Database Id"
               name="databaseId"
-              value={auth.databaseId}
-              onChange={handleChange}
+              value={databaseId}
+              onChange={(e) => setDatabaseId(e.target.value)}
             />
             <InputRightElement width="4.5rem">
               <Button h="1.75rem" size="sm" onClick={handleClickId}>
@@ -180,12 +196,13 @@ const NotionAuth = ({ slug }) => {
               </Button>
             </InputRightElement>
           </InputGroup>
+
           {!apiAuth && (
             <Button
               mt={4}
               colorScheme="purple"
-              isLoading={false}
-              disabled={isFetching}
+              loadingText="Submitting"
+              isLoading={load ? true : false}
               type="submit"
             >
               Submit
@@ -241,7 +258,7 @@ const NotionAuth = ({ slug }) => {
                         handleDelete();
                       }}
                     >
-                      Delete Credentials
+                      Delete Integration
                     </Button>
                   </Stack>
                 </Stack>
@@ -258,30 +275,33 @@ const NotionAuth = ({ slug }) => {
 
 const ApiAuth = ({ slug, required }) => {
   const { dispatch, isFetching, apiKey } = useContext(DataApiContext);
+  const axiosPrivate = useAxiosPrivate();
   useEffect(() => {
-    getApiKey({ apiSlug: slug }, dispatch);
-  }, [dispatch]);
+    GetApiKey({ apiSlug: slug }, axiosPrivate, dispatch);
+  }, [dispatch, slug]);
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
-  const [auth, setAuth] = useState({
-    key: "",
-    apiSlug: slug,
-  });
-  const handleChange = (e) => {
-    const name = e.target.name;
-    const value = e.target.value;
-    setAuth({ ...auth, [name]: value });
+  const [key, setKey] = useState("");
+  const [load, setLoad] = useState(false);
+  // const handleChange = (e) => {
+  //   const name = e.target.name;
+  //   const value = e.target.value;
+  //   setAuth({ ...auth, [name]: value });
 
-    console.log(auth);
+  //   console.log(auth);
+  // };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoad(true);
+    console.log("submitted", !load);
+    await CreateApiKey({ key, apiSlug: slug }, axiosPrivate, dispatch);
+
+    setKey("");
+    setLoad(false);
   };
   const handleDelete = () => {
-    deleteApiKey({ apiSlug: slug }, dispatch);
-  };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("submitted");
-    createApiKey(auth, dispatch);
-    setAuth({ key: "" });
+    console.log("submitted end", load);
+    DeleteApiKey({ apiSlug: slug }, axiosPrivate, dispatch);
   };
 
   return (
@@ -329,9 +349,9 @@ const ApiAuth = ({ slug, required }) => {
               pr="4.5rem"
               type={show ? "text" : "password"}
               placeholder="Enter API Key"
-              value={auth.key}
+              value={key}
               name="key"
-              onChange={handleChange}
+              onChange={(e) => setKey(e.target.value)}
             />
             <InputRightElement width="4.5rem">
               <Button h="1.75rem" size="sm" onClick={handleClick}>
@@ -339,12 +359,13 @@ const ApiAuth = ({ slug, required }) => {
               </Button>
             </InputRightElement>
           </InputGroup>
+
           {!apiKey && (
             <Button
               my={4}
+              loadingText="Submitting"
               colorScheme="purple"
-              isLoading={false}
-              disabled={isFetching}
+              isLoading={load ? true : false}
               type="submit"
             >
               Submit

@@ -1,4 +1,4 @@
-const OmdbReducer = (state, action) => {
+const CalendaridicReducer = (state, action) => {
   switch (action.type) {
     case "GET_HOLIDAYS_START":
       return {
@@ -43,4 +43,4 @@ const OmdbReducer = (state, action) => {
     }
   }
 };
-export default OmdbReducer;
+export default CalendaridicReducer;

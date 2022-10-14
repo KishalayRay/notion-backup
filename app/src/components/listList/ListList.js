@@ -2,46 +2,35 @@ import { useContext, useEffect, useState } from "react";
 import { Spinner, Center } from "@chakra-ui/react";
 
 import { Link } from "react-router-dom";
-import axios from "axios";
-
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
+import useAuth from "../../hooks/useAuth";
 import {
   Box,
   SimpleGrid,
   Stat,
   StatLabel,
   Container,
-  StatNumber,
+  Image,
   Stack,
+  Badge,
   Avatar,
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
-//import { getLists } from "../../context/listContext/apiCalls";
 
 const List = () => {
+  const { auth } = useAuth();
+  const axiosPrivate = useAxiosPrivate();
   const [proList, setProList] = useState([]);
   const [lists, setLists] = useState([]);
   const fetchProList = async () => {
-    const response = await axios.get(
-      `http://localhost:8000/api/v1/apilist/pro`,
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    const response = await axiosPrivate.get(`/apilist/pro`);
     setProList(response.data.data.api);
     console.log(response.data.data.api);
   };
 
   const fetchList = async () => {
-    const response = await axios.get(`http://localhost:8000/api/v1/apilist/`, {
-      headers: {
-        token: `Bearer ${JSON.parse(localStorage.getItem("user")).accessToken}`,
-      },
-    });
+    const response = await axiosPrivate.get(`/apilist/`);
     setLists(response.data.data.api);
     console.log(response.data.data.api);
   };
@@ -56,14 +45,7 @@ const List = () => {
     <>
       {!listLength ? (
         <Center>
-          <Spinner
-            mt={16}
-            thickness="4px"
-            speed="0.65s"
-            emptyColor="purple.200"
-            color="purple.500"
-            size="xl"
-          />
+          <Spinner mt={16} color="purple.500" size="xl" />
         </Center>
       ) : (
         <>
@@ -81,6 +63,7 @@ const List = () => {
                           title={list.apiName}
                           stat={list.description}
                           image={list.logo}
+                          isPro={false}
                         />
                       </Link>
                     );
@@ -91,6 +74,7 @@ const List = () => {
                         title={list.apiName}
                         stat={list.description}
                         image={list.logo}
+                        isPro={true}
                       />
                     );
                   })}
@@ -125,25 +109,37 @@ const List = () => {
   );
 };
 function StatsCard(props) {
-  const { title, stat, image } = props;
+  const { title, stat, image, isPro } = props;
   return (
     <Stat
-      px={{ base: 4, md: 6 }}
-      py={"5"}
-      shadow={"xl"}
-      border={"2px solid"}
-      borderColor={useColorModeValue("white.800", "white.500")}
-      rounded={"lg"}
+      px={{ base: "4", md: "6" }}
+      py={{ base: "5", md: "6" }}
+      bg="bg-surface"
+      borderRadius="lg"
+      boxShadow={useColorModeValue("sm", "sm-dark")}
     >
       <StatLabel fontWeight={"medium"} isTruncated>
         <Stack mt={1} direction={"row"} spacing={4} align={"center"}>
-          <Avatar src={image} alt={"api"} size={"sm"} objectFit="cover" />
-          <Stack direction={"column"} spacing={0} fontSize={"sm"}>
+          <Image
+            boxSize="40px"
+            objectFit="cover"
+            src={image}
+            alt="Dan Abramov"
+          />
+
+          <Stack direction={"column"} spacing={0} fontSize={"md"}>
             <Text fontWeight={600}>{title}</Text>
           </Stack>
+          {isPro ? (
+            <Badge colorScheme="purple" variant="solid">
+              Pro
+            </Badge>
+          ) : (
+            <></>
+          )}
         </Stack>
       </StatLabel>
-      <Text mt={2} sssssfontSize="xl">
+      <Text mt={2} sssfontSize="xl">
         {stat}
       </Text>
     </Stat>

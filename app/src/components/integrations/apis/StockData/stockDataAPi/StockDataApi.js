@@ -12,13 +12,15 @@ import {
   Input,
   Spinner,
 } from "@chakra-ui/react";
+import useAxiosPrivate from "../../../../../hooks/useAxiosPrivate";
 import { useContext, useState, useEffect } from "react";
 import { RepeatIcon } from "@chakra-ui/icons";
 import { StockDataContext } from "../context/context";
 import { StockDatalistContext } from "../stockDatalistContext/listContext";
 import { Link } from "react-router-dom";
-import { createStock } from "../stockDatalistContext/apiCalls";
+import { CreateStock } from "../stockDatalistContext/apiCalls";
 const StockData = () => {
+  const axiosPrivate = useAxiosPrivate();
   const { query, searchStock, stocks, addStock, isLoading, fetchStock } =
     useContext(StockDataContext);
   const { dispatch } = useContext(StockDatalistContext);
@@ -28,7 +30,10 @@ const StockData = () => {
     searchStock(queryM);
   };
   useEffect(() => {
-    fetchStock();
+    fetchStock(axiosPrivate);
+    return () => {
+      setQueryM("");
+    };
   }, [query]);
   return (
     <Stack>
@@ -100,14 +105,7 @@ const StockData = () => {
             </center>
             {isLoading ? (
               <Center>
-                <Spinner
-                  mt={16}
-                  thickness="4px"
-                  speed="0.65s"
-                  emptyColor="purple.200"
-                  color="purple.500"
-                  size="xl"
-                />
+                <Spinner mt={16} color="purple.500" size="xl" />
               </Center>
             ) : (
               <>
@@ -134,7 +132,11 @@ const StockData = () => {
                         colorScheme="purple"
                         size="sm"
                         onClick={() => {
-                          createStock(stock["1. symbol"], dispatch);
+                          CreateStock(
+                            stock["1. symbol"],
+                            axiosPrivate,
+                            dispatch
+                          );
                           addStock(stock["1. symbol"]);
                         }}
                       >

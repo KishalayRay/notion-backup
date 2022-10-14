@@ -1,13 +1,15 @@
-import axios from "axios";
 import { loginFailure, loginStart, loginSuccess } from "./AuthActions";
-export const login = async (user, dispatch) => {
+import axios from "../../api/axios";
+export const LoginUser = async (user, dispatch) => {
   dispatch(loginStart);
   try {
-    const response = await axios.post(
-      `http://localhost:8000/api/v1/auth/login`,
-      user
+    const response = await axios.post(`/auth/login`, user);
+    dispatch(
+      loginSuccess({
+        email: response.data.data.user.email,
+        accessToken: response.data.data.accessToken,
+      })
     );
-    dispatch(loginSuccess(response.data.data));
     //dispatch(loginSuccess(response.data.data));
   } catch (e) {
     console.log(e);

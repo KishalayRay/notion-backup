@@ -6,7 +6,6 @@ import {
   Input,
   Checkbox,
   Stack,
-  Link,
   Button,
   Heading,
   Text,
@@ -16,15 +15,38 @@ import {
   AlertIcon,
 } from "@chakra-ui/react";
 import { useState, useContext } from "react";
-import { login } from "../../context/authContext/apiCalls";
-import { AuthContext } from "../../context/authContext/AuthContext";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+
+//import { LoginUser } from "../../context/authContext/apiCalls";
+//import { AuthContext } from "../../context/authContext/AuthContext";
+import axios from "../../api/axios";
+import useAuth from "../../hooks/useAuth";
 const Login = () => {
-  const { dispatch, isFetching, errors } = useContext(AuthContext);
+  //const { dispatch, isFetching, errors } = useContext(AuthContext);
+  const { setAuth } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/apis";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const handleSubmit = (e) => {
+  const [load, setLoad] = useState(false);
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login({ email, password }, dispatch);
+    setLoad(true);
+    try {
+      const response = await axios.post(`/auth/login`, {
+        email: email,
+        password: password,
+      });
+      setAuth({
+        isAdmin: response.data.data.user.isAdmin,
+        accessToken: response.data.data.accessToken,
+      });
+      navigate(from, { replace: true });
+    } catch (e) {
+      console.log(e);
+    }
+    setLoad(false);
   };
   return (
     <Flex
@@ -37,17 +59,16 @@ const Login = () => {
         <Stack align={"center"}>
           <Heading fontSize={"4xl"}>Sign in to your account</Heading>
           <Text fontSize={"lg"} color={"gray.600"}>
-            to enjoy all of our cool <Link color={"purple.400"}>features</Link>{" "}
-            ✌️
+            to enjoy all of our cool features ✌️
           </Text>
         </Stack>
 
-        {errors && (
+        {/* {errors && (
           <Alert status="error">
             <AlertIcon />
             <AlertDescription>{errors.message}</AlertDescription>
           </Alert>
-        )}
+        )} */}
         <Box
           rounded={"lg"}
           bg={useColorModeValue("white", "gray.700")}
@@ -80,16 +101,19 @@ const Login = () => {
                 justify={"space-between"}
               >
                 <Checkbox>Remember me</Checkbox>
-                <Link color={"purple.400"}>Forgot password?</Link>
+                <Link color={"purple.400"} to="/auth/activate/password/reset">
+                  Forgot password?
+                </Link>
               </Stack>
               <Button
                 bg={"purple.400"}
                 color={"white"}
+                loadingText="Signing In"
                 _hover={{
                   bg: "purple.500",
                 }}
+                isLoading={load ? true : false}
                 onClick={handleSubmit}
-                disabled={isFetching}
               >
                 Sign in
               </Button>

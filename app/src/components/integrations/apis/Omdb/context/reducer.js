@@ -10,10 +10,12 @@ const Reducer = (state, action) => {
         ...state,
         isLoading: false,
         movies: action.payload.movies,
+        query: "",
       };
     case "ADD_MOVIE":
       return {
         ...state,
+        query: "",
         movies: state.movies.filter((movie) => {
           return movie.imdbID !== action.payload;
         }),

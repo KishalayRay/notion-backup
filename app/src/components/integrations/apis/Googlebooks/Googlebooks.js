@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   Center,
@@ -15,20 +16,25 @@ import {
   Td,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
+import useAxiosPrivate from "../../../../hooks/useAxiosPrivate";
 import { DeleteIcon, RepeatIcon } from "@chakra-ui/icons";
 import { useContext, useEffect } from "react";
 import { GooglebookslistContext } from "./googlebookslistContext/listContext";
 
-import { getBooks, deleteBook } from "./googlebookslistContext/apiCalls";
+import { GetBooks, DeleteBook } from "./googlebookslistContext/apiCalls";
 const Googlebooks = () => {
+  const [load, setLoad] = useState(false);
+  const axiosPrivate = useAxiosPrivate();
   const { dispatch, book } = useContext(GooglebookslistContext);
 
   useEffect(() => {
-    getBooks(dispatch);
+    GetBooks(axiosPrivate, dispatch);
   }, [dispatch]);
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
+    setLoad(true);
     console.log(id);
-    deleteBook(id, dispatch);
+    await DeleteBook(id, axiosPrivate, dispatch);
+    setLoad(false);
   };
 
   return (
@@ -89,9 +95,7 @@ const Googlebooks = () => {
                   <Th>
                     <Text fontWeight={600}>Author</Text>
                   </Th>
-                  <Th>
-                    <Text fontWeight={600}>ISBN</Text>
-                  </Th>
+
                   <Th>
                     <Text fontWeight={600}>Page count</Text>
                   </Th>
@@ -122,11 +126,16 @@ const Googlebooks = () => {
                         />
                       </Td>
                       <Td>{volume.bookAuthor}</Td>
-                      <Td>{volume.bookIsbn}</Td>
                       <Td>{volume.bookPage}</Td>
                       <Td>{volume.bookCategory}</Td>
                       <Td>
-                        <DeleteIcon onClick={() => handleDelete(volume._id)} />
+                        <Button
+                          size="sm"
+                          isLoading={load ? true : false}
+                          onClick={() => handleDelete(volume._id)}
+                        >
+                          <DeleteIcon />
+                        </Button>
                       </Td>
                     </Tr>
                   );

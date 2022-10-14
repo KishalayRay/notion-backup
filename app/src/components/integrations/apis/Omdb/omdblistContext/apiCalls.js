@@ -12,19 +12,10 @@ import {
   createOmdbSuccess,
   createOmdbFailure,
 } from "./listActions";
-export const getMovies = async (dispatch) => {
+export const GetMovies = async (axiosPrivate, dispatch) => {
   dispatch(getOmdbStart);
   try {
-    const response = await axios.get(
-      `http://localhost:8000/api/v1/omdb/omdbs`,
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    const response = await axiosPrivate.get(`/omdb/omdbs`);
 
     dispatch(getOmdbSuccess(response.data.data.Omdb));
     console.log(response.data.data.Omdb);
@@ -32,27 +23,13 @@ export const getMovies = async (dispatch) => {
     dispatch(getOmdbFailure);
   }
 };
-export const createMovie = async (movieId, dispatch) => {
+export const CreateMovie = async (movieId, axiosPrivate, dispatch) => {
   dispatch(createOmdbStart);
   console.log(movieId);
   try {
-    const res = await axios.post(
-      `http://localhost:8000/api/v1/apiconfig/key`,
-      { apiSlug: "Omdb" },
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
-    const hashedData = res.data.data.ApiKey.keys[0].key;
-    console.log(hashedData);
-    const apiKey = cryptoJS.AES.decrypt(
-      hashedData,
-      "3DNFRo2no81p8KUEIN47B%$^&6c4876"
-    ).toString(cryptoJS.enc.Utf8);
+    const res = await axiosPrivate.post(`/apiconfig/key`, { apiSlug: "Omdb" });
+    const apiKey = res.data.data.ApiKey.keys[0].key;
+
     const response = await axios.get(
       `http://www.omdbapi.com/?apikey=${apiKey}&i=${movieId}`
     );
@@ -62,33 +39,21 @@ export const createMovie = async (movieId, dispatch) => {
       movieId: movie.imdbID,
       movieTitle: movie.Title,
       movieImage: movie.Poster,
-      movieGenre: movie.Genre,
-      movieDuration: movie.Runtime,
-      movieRating: movie.imdbRating,
-      movieYear: movie.Year,
+      movieGenre: movie.Genre.split(",")[0],
+      movieDuration: parseFloat(movie.Runtime) || 0,
+      movieRating: parseFloat(movie.imdbRating) || 0,
+      movieYear: parseFloat(movie.Year) || 0,
     };
 
-    const postData = await axios.post(
-      `http://localhost:8000/api/v1/omdb/newomdb`,
-      {
-        movieId: movie.imdbID,
-        movieTitle: movie.Title,
-        movieImage: movie.Poster,
-        movieGenre: movie.Genre,
-        movieDuration: movie.Runtime,
-        movieRating: movie.imdbRating,
-        movieYear: movie.Year,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    const postData = await axiosPrivate.post(`/omdb/newomdb`, {
+      movieId: movie.imdbID,
+      movieTitle: movie.Title,
+      movieImage: movie.Poster,
+      movieGenre: movie.Genre.split(",")[0],
+      movieDuration: parseFloat(movie.Runtime) || 0,
+      movieRating: parseFloat(movie.imdbRating) || 0,
+      movieYear: parseFloat(movie.Year) || 0,
+    });
     console.log(postData.data);
     console.log(movieObject);
     dispatch(createOmdbSuccess(movieObject));
@@ -111,7 +76,7 @@ export const createMovie = async (movieId, dispatch) => {
 //   };
 
 // axios.post(
-//   `http://localhost:8000/api/v1/omdb/newomdb`,
+//   `/omdb/newomdb`,
 //   {
 //     movieId: movie.imdbID,
 //     movieTitle: movie.Title,
@@ -130,21 +95,11 @@ export const createMovie = async (movieId, dispatch) => {
 //   }
 // );
 // console.log("success post");
-export const deleteMovie = async (id, dispatch) => {
+export const DeleteMovie = async (id, axiosPrivate, dispatch) => {
   dispatch(deleteOmdbStart);
 
   try {
-    await axios.put(
-      `http://localhost:8000/api/v1/omdb/${id}`,
-      {},
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    await axiosPrivate.put(`/omdb/${id}`, {});
 
     dispatch(deleteOmdbSuccess(id));
   } catch (e) {

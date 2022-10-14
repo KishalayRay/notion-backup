@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   Box,
   Center,
@@ -15,20 +16,25 @@ import {
   Td,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
+import useAxiosPrivate from "../../../../hooks/useAxiosPrivate";
 import { DeleteIcon, RepeatIcon } from "@chakra-ui/icons";
 import { useContext, useEffect } from "react";
 import { OmdblistContext } from "./omdblistContext/listContext";
 
-import { getMovies, deleteMovie } from "./omdblistContext/apiCalls";
+import { GetMovies, DeleteMovie } from "./omdblistContext/apiCalls";
 const Omdb = () => {
+  const [load, setLoad] = useState(false);
+  const axiosPrivate = useAxiosPrivate();
   const { dispatch, omdb } = useContext(OmdblistContext);
 
   useEffect(() => {
-    getMovies(dispatch);
+    GetMovies(axiosPrivate, dispatch);
   }, [dispatch]);
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
+    setLoad(true);
     console.log(id);
-    deleteMovie(id, dispatch);
+    await DeleteMovie(id, axiosPrivate, dispatch);
+    setLoad(false);
   };
 
   return (
@@ -126,7 +132,14 @@ const Omdb = () => {
                       <Td>{movie.movieRating}</Td>
                       <Td>{movie.movieDuration} min</Td>
                       <Td>
-                        <DeleteIcon onClick={() => handleDelete(movie._id)} />
+                        <Button
+                          size="sm"
+                          isLoading={load ? true : false}
+                          onClick={() => handleDelete(movie._id)}
+                        >
+                          {" "}
+                          <DeleteIcon />
+                        </Button>
                       </Td>
                     </Tr>
                   );

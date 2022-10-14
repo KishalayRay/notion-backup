@@ -1,6 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
-import axios from "axios";
-import { Link } from "react-router-dom";
+
+import { Link, useNavigate } from "react-router-dom";
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
+import useLogout from "../../hooks/useLogout";
+import useAuth from "../../hooks/useAuth";
 import {
   IconButton,
   Avatar,
@@ -9,6 +12,7 @@ import {
   Flex,
   HStack,
   VStack,
+  Badge,
   Icon,
   useColorModeValue,
   Text,
@@ -27,8 +31,7 @@ import {
   FiChevronDown,
 } from "react-icons/fi";
 import { SunIcon } from "@chakra-ui/icons";
-import { AuthContext } from "../../context/authContext/AuthContext";
-import { logout } from "../../context/authContext/AuthActions";
+
 const SidebarContent = ({ onClose, ...rest }) => {
   return (
     <Box
@@ -43,26 +46,26 @@ const SidebarContent = ({ onClose, ...rest }) => {
     >
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
         <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
-          Logo
+          DashBoard
         </Text>
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
-      <Link to="/apis/">
+      <Link to="/apis">
         <NavItem key={"APIs"} icon={FiHome}>
           APIs
         </NavItem>
       </Link>
-      <Link to="/account/">
+      <Link to="/account">
         <NavItem key={"Account"} icon={FiSettings}>
           Account
         </NavItem>
       </Link>
-      <Link to="/integrations/">
+      <Link to="/integrations">
         <NavItem key={"Integrations"} icon={FiCompass}>
           Integrations
         </NavItem>
       </Link>
-      <Link to="/usgae/">
+      <Link to="/usage">
         <NavItem key={"Usage"} icon={FiTrendingUp}>
           Usage
         </NavItem>
@@ -102,15 +105,17 @@ const NavItem = ({ icon, children, ...rest }) => {
 };
 
 const MobileNav = ({ onOpen, ...rest }) => {
-  const { dispatch } = useContext(AuthContext);
+  const { auth } = useAuth();
+  const navigate = useNavigate();
+  const logout = useLogout();
+  const axiosPrivate = useAxiosPrivate();
   const [user, setUser] = useState({});
-
+  const signOut = async () => {
+    await logout();
+    navigate("/");
+  };
   const fetchUser = async () => {
-    const response = await axios.get(`http://localhost:8000/api/v1/auth/user`, {
-      headers: {
-        token: `Bearer ${JSON.parse(localStorage.getItem("user")).accessToken}`,
-      },
-    });
+    const response = await axiosPrivate.get(`/auth/user`);
     console.log(response.data.data.user);
     setUser(response.data.data.user);
   };
@@ -150,9 +155,11 @@ const MobileNav = ({ onOpen, ...rest }) => {
       <HStack spacing={{ base: "0", md: "6" }}>
         <Link to="/upgrade">
           {" "}
-          <Text fontSize="sm">Upgrade</Text>
+          <Badge variant="subtle" colorScheme="purple">
+            Upgrade
+          </Badge>
         </Link>
-
+        {JSON.stringify(auth)}
         <IconButton
           size="lg"
           variant="ghost"
@@ -167,7 +174,10 @@ const MobileNav = ({ onOpen, ...rest }) => {
               _focus={{ boxShadow: "none" }}
             >
               <HStack>
-                <Avatar size={"sm"} />
+                <Avatar
+                  size={"sm"}
+                  src="https://img.icons8.com/cotton/344/super-mario.png"
+                />
                 <VStack
                   display={{ base: "none", md: "flex" }}
                   alignItems="flex-start"
@@ -190,7 +200,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
               </Link>
 
               <MenuDivider />
-              <MenuItem onClick={() => dispatch(logout())}>Sign out</MenuItem>
+              <MenuItem onClick={signOut}>Sign out</MenuItem>
             </MenuList>
           </Menu>
         </Flex>

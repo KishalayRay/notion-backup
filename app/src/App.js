@@ -1,16 +1,15 @@
 import React, { useContext } from "react";
 
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Layout from "./pages/routeHelpers/Layout";
 import ListListContainer from "./components/listList/ListListContainer";
 import ListContaiter from "./components/list/ListContaiter";
+import StatContainer from "./components/stat/StatContainer";
 import LandingPage from "./pages/landingPage/LandingPage";
 import Register from "./pages/register/Register";
 import EmailVerify from "./pages/emailVerify/EmailVerify";
+import Reset from "./pages/forgotPassword/Reset";
+import Forgot from "./pages/forgotPassword/Forgot";
 import Pricing from "./pages/pricing/Pricing";
 import Login from "./pages/login/Login";
 import IntegrationContainer from "./components/integrations/IntegrationContainer";
@@ -21,101 +20,160 @@ import StockDataApiContainer from "./components/integrations/apis/StockData/stoc
 import UnsplashContainer from "./components/integrations/apis/Unsplash/UnsplashContainer";
 import UnsplashDataApiContainer from "./components/integrations/apis/Unsplash/unsplashDataAPi/UnsplashDataApiContainer";
 import CalendarificContainer from "./components/integrations/apis/Calenderific/CalendarificContainer";
+import GoogleJobsContainer from "./components/integrations/apis/GoogleJobs/GoogleJobsContainer";
+import GoogleKeywordContainer from "./components/integrations/apis/GoogleKeyword/GoogleKeywordContainer";
+import TheNewsApiContainer from "./components/integrations/apis/TheNewsApi/TheNewsApiContainer";
 import GooglebooksContainer from "./components/integrations/apis/Googlebooks/GooglebooksContainer";
 import GooglebooksDataApiContainer from "./components/integrations/apis/Googlebooks/googlebooksDataAPi/GooglebooksDataApiContainer";
+import SpoonacularContainer from "./components/integrations/apis/Spoonacular/SpoonacularContainer";
+import SpoonacularDataApiContainer from "./components/integrations/apis/Spoonacular/spoonacularDataAPi/SpoonacularDataApiContainer";
+import CaloriesBurnedContainer from "./components/integrations/apis/CaloriesBurned/CaloriesBurnedContainer";
+import CaloriesBurnedDataApiContainer from "./components/integrations/apis/CaloriesBurned/CaloriesBurnedDataApi/CaloriesBurnedDataApiContainer";
+import BigPictureContainer from "./components/integrations/apis/Bigpicture/BigPictureContainer";
+import BigPictureDataApiContainer from "./components/integrations/apis/Bigpicture/BigPictureDataApi/BigPictureDataApiContainer";
+import HunterContainer from "./components/integrations/apis/Hunter/HunterContainer";
 import AccountContainer from "./components/Account/AccountContainer";
-import { AuthContext } from "./context/authContext/AuthContext";
 import PageNotFound from "./pages/error/PageNotFound";
-//import List from "./components/list/ListList";
+
+import RequireAuth from "./pages/routeHelpers/RequireAuth";
+import PersistLogin from "./pages/routeHelpers/PersistLogin";
+import useAuth from "./hooks/useAuth";
 const App = () => {
-  const { user } = useContext(AuthContext);
+  const { auth } = useAuth();
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={!user ? <LandingPage /> : <Navigate to="/apis" />}
-        />
-        <Route path="/auth/activate/:token" element={<EmailVerify />}></Route>
-        <Route
-          path="/upgrade"
-          element={user ? <Pricing /> : <Navigate to="/" />}
-        ></Route>
-        <Route
-          path="/apis"
-          element={user ? <ListListContainer /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/integrations"
-          element={user ? <IntegrationContainer /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/account"
-          element={user ? <AccountContainer /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/apis/:listId"
-          element={user ? <ListContaiter /> : <Navigate to="/" />}
-        />
-        {/* Omdb */}
-        <Route
-          path="/integrations/Omdb"
-          element={user ? <OmdbContainer /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/integrations/Omdb/apiImport"
-          element={user ? <OmdbDataApiContainer /> : <Navigate to="/" />}
-        />
+    <Routes>
+      <Route path="/" index element={<LandingPage />} />
+      <Route path="/auth/activate/:token" element={<EmailVerify />} />
+      <Route path="/auth/activate/password/reset" element={<Forgot />} />
+      <Route path="/auth/activate/password/reset/:token" element={<Reset />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
+    
+      <Route path="*" element={<PageNotFound />} />
+      <Route path="/*" element={<Layout />}>
+        <Route elelment={<PersistLogin />}>
+          <Route element={<RequireAuth />}>
+            <Route path="upgrade" element={<Pricing />} />
 
-        {/* Omdb */}
-        {/* Stockdata */}
-        <Route
-          path="/integrations/Alphavantage"
-          element={user ? <StockDataContainer /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/integrations/Alphavantage/apiImport"
-          element={user ? <StockDataApiContainer /> : <Navigate to="/" />}
-        />
-        {/* Stockdata */}
-        {/* Unsplash */}
-        <Route
-          path="/integrations/Unsplash"
-          element={user ? <UnsplashContainer /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/integrations/Unsplash/apiImport"
-          element={user ? <UnsplashDataApiContainer /> : <Navigate to="/" />}
-        />
-        {/* Unsplash */}
-        {/* Calendarific */}
-        <Route
-          path="/integrations/Calendarific"
-          element={user ? <CalendarificContainer /> : <Navigate to="/" />}
-        />
+            <Route path="apis" element={<ListListContainer />} />
 
-        {/* Calendarific */}
-        {/* Googlebooks */}
-        <Route
-          path="/integrations/Googlebooks"
-          element={user ? <GooglebooksContainer /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/integrations/Googlebooks/apiImport"
-          element={user ? <GooglebooksDataApiContainer /> : <Navigate to="/" />}
-        />
-        {/* Googlebooks */}
-        <Route
-          path="/register"
-          element={!user ? <Register /> : <Navigate to="/apis" />}
-        />
-        <Route
-          path="/login"
-          element={!user ? <Login /> : <Navigate to="/apis" />}
-        />
-        <Route path="*" element={<PageNotFound />} />
-      </Routes>
-    </Router>
+            <Route path="integrations" element={<IntegrationContainer />} />
+
+            <Route path="account" element={<AccountContainer />} />
+
+            <Route path="usage" element={<StatContainer />} />
+
+            <Route path="apis/:listId" element={<ListContaiter />} />
+
+            {/* Omdb */}
+            <Route path="integrations/Omdb" element={<OmdbContainer />} />
+            <Route
+              path="integrations/Omdb/apiImport"
+              element={<OmdbDataApiContainer />}
+            />
+            {/* Omdb */}
+
+            {/* Stockdata */}
+            <Route
+              path="integrations/Alphavantage"
+              element={<StockDataContainer />}
+            />
+            <Route
+              path="integrations/Alphavantage/apiImport"
+              element={<StockDataApiContainer />}
+            />
+            {/* Stockdata */}
+
+            {/* Unsplash */}
+            <Route
+              path="integrations/Unsplash"
+              element={<UnsplashContainer />}
+            />
+            <Route
+              path="integrations/Unsplash/apiImport"
+              element={<UnsplashDataApiContainer />}
+            />
+            {/* Unsplash */}
+
+            {/* Calendarific */}
+            <Route
+              path="integrations/Calendarific"
+              element={<CalendarificContainer />}
+            />
+
+            {/* Calendarific */}
+            {/* Googlejobs */}
+            <Route
+              path="integrations/Googlejobs"
+              element={<GoogleJobsContainer />}
+            />
+
+            {/* Googlejobs */}
+            {/* Googlekeyword */}
+            <Route
+              path="integrations/Googlekeyword"
+              element={<GoogleKeywordContainer />}
+            />
+
+            {/* Googlekeyword */}
+            {/* Hunter */}
+            <Route path="integrations/Hunter" element={<HunterContainer />} />
+
+            {/* Hunter */}
+
+            {/* TheNewsApi */}
+            <Route
+              path="integrations/Thenewsapi"
+              element={<TheNewsApiContainer />}
+            />
+
+            {/* TheNewsApi */}
+
+            {/* Googlebooks */}
+            <Route
+              path="integrations/Googlebooks"
+              element={<GooglebooksContainer />}
+            />
+            <Route
+              path="integrations/Googlebooks/apiImport"
+              element={<GooglebooksDataApiContainer />}
+            />
+            {/* Googlebooks */}
+
+            {/* Spoonacular */}
+            <Route
+              path="integrations/Spoonacular"
+              element={<SpoonacularContainer />}
+            />
+            <Route
+              path="integrations/Spoonacular/apiImport"
+              element={<SpoonacularDataApiContainer />}
+            />
+            {/* Spoonacular */}
+            {/* CaloriesBurned */}
+            <Route
+              path="integrations/Caloriesburned"
+              element={<CaloriesBurnedContainer />}
+            />
+            <Route
+              path="integrations/Caloriesburned/apiImport"
+              element={<CaloriesBurnedDataApiContainer />}
+            />
+            {/* CaloriesBurned */}
+            {/* Bigpicture */}
+            <Route
+              path="integrations/Bigpicture"
+              element={<BigPictureContainer />}
+            />
+            <Route
+              path="integrations/Bigpicture/apiImport"
+              element={<BigPictureDataApiContainer />}
+            />
+            {/* Bigpicture */}
+          </Route>
+        </Route>
+      </Route>
+    </Routes>
   );
 };
 

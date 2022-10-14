@@ -1,25 +1,23 @@
 import { useState, useEffect } from "react";
 import {
   Box,
-  Heading,
   Text,
   Button,
   Alert,
   Center,
   AlertIcon,
-  AlertTitle,
   AlertDescription,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import jwtDecode from "jwt-decode";
 const EmailVerify = () => {
   const [state, setState] = useState({
     name: "",
     token: "",
   });
-  const navigate = useNavigate();
+  const [load, setLoad] = useState(false);
+
   const [errorMessage, setErrorMessage] = useState(null);
 
   let { token } = useParams();
@@ -30,6 +28,7 @@ const EmailVerify = () => {
     }
   }, [token]);
   const clickSubmit = async (e) => {
+    setLoad(true);
     e.preventDefault();
     try {
       await axios.post(`http://localhost:8000/api/v1/auth/register/activate`, {
@@ -41,11 +40,13 @@ const EmailVerify = () => {
         name: "",
         token: "",
       });
+      setLoad(false);
     } catch (error) {
       setState({
         ...state,
       });
       setErrorMessage(error.response.data.message);
+      setLoad(false);
     }
   };
   return (
@@ -67,6 +68,8 @@ const EmailVerify = () => {
           bgGradient="linear(to-r, teal.400, teal.500, teal.600)"
           color="white"
           variant="solid"
+          loadingText=" Activating"
+          isLoading={load ? true : false}
           onClick={clickSubmit}
         >
           Activate

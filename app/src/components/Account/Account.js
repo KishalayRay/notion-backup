@@ -11,58 +11,40 @@ import {
   Avatar,
   Button,
   useColorModeValue,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { CheckIcon } from "@chakra-ui/icons";
-import axios from "axios";
-
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
+import useAuth from "../../hooks/useAuth";
 const Account = () => {
+  const { auth } = useAuth();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const axiosPrivate = useAxiosPrivate();
   const [user, setUser] = useState({});
   const [subscription, setSubscription] = useState("");
   const navigate = useNavigate();
   const handleSubscription = async () => {
-    const response = await axios.post(
-      `http://localhost:8000/api/v1/subs/cancel`,
-      {},
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    const response = await axiosPrivate.post(`/subs/cancel`, {});
     navigate("/apis");
     console.log(response.data);
   };
   const fetchUser = async () => {
-    const response = await axios.get(
-      `http://localhost:8000/api/v1/auth/user`,
-
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    const response = await axiosPrivate.get(`/auth/user`);
     console.log(response.data.data.user);
     setUser(response.data.data.user);
   };
   const fetchSubscription = async () => {
-    const response = await axios.get(
-      `http://localhost:8000/api/v1/subs/subscription`,
-
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    const response = await axiosPrivate.get(`/subs/subscription`);
     if (!response.data.data.subscription.data.length) {
       setSubscription("Free");
     }
@@ -87,14 +69,7 @@ const Account = () => {
     <>
       {!subscription ? (
         <Center>
-          <Spinner
-            mt={16}
-            thickness="4px"
-            speed="0.65s"
-            emptyColor="purple.200"
-            color="purple.500"
-            size="xl"
-          />
+          <Spinner mt={16} color="purple.500" size="xl" />
         </Center>
       ) : (
         <>
@@ -102,12 +77,16 @@ const Account = () => {
             <Box
               maxW={"530px"}
               w={"full"}
-              boxShadow={"2xl"}
               rounded={"md"}
               overflow={"hidden"}
+              bg="bg-surface"
+              borderRadius="lg"
             >
               <Stack textAlign={"center"} p={6} align={"center"}>
-                <Avatar alt={"Author"} />
+                <Avatar
+                  alt={"Author"}
+                  src="https://img.icons8.com/cotton/344/super-mario.png"
+                />
                 <Stack direction={"column"} spacing={0} fontSize={"sm"}>
                   <Text fontWeight={600}>{user.username}</Text>
                   <Text color={"gray.500"}>{user.email}</Text>
@@ -140,24 +119,52 @@ const Account = () => {
                   </Center>
                 </Stack>
                 {subscription === "Pro" ? (
-                  <Button
-                    mt={10}
-                    w={"full"}
-                    bg={"purple.400"}
-                    color={"white"}
-                    rounded={"xl"}
-                    _hover={{
-                      bg: "purple.500",
-                    }}
-                    _focus={{
-                      bg: "purple.500",
-                    }}
-                    onClick={() => {
-                      handleSubscription();
-                    }}
-                  >
-                    Cancel Subscription
-                  </Button>
+                  <>
+                    <Button
+                      onClick={onOpen}
+                      mt={10}
+                      w={"full"}
+                      bg={"purple.400"}
+                      color={"white"}
+                      rounded={"xl"}
+                      _hover={{
+                        bg: "purple.500",
+                      }}
+                      _focus={{
+                        bg: "purple.500",
+                      }}
+                    >
+                      Cancel Subscription
+                    </Button>
+
+                    <Modal isOpen={isOpen} onClose={onClose}>
+                      <ModalOverlay />
+                      <ModalContent>
+                        <ModalHeader>Important!</ModalHeader>
+                        <ModalCloseButton />
+                        <ModalBody>
+                          <Text>
+                            Are you sure that you want to cancel the
+                            Subscription?
+                          </Text>
+                        </ModalBody>
+
+                        <ModalFooter>
+                          <Button colorScheme="blue" mr={3} onClick={onClose}>
+                            Close
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            onClick={() => {
+                              handleSubscription();
+                            }}
+                          >
+                            Yes
+                          </Button>
+                        </ModalFooter>
+                      </ModalContent>
+                    </Modal>
+                  </>
                 ) : (
                   <Link to="/upgrade">
                     <Button

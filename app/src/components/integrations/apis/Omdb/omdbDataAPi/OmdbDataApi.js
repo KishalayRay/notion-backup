@@ -13,13 +13,16 @@ import {
   Input,
   Spinner,
 } from "@chakra-ui/react";
+import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { RepeatIcon } from "@chakra-ui/icons";
 import { OmdbContext } from "../context/context";
 import { OmdblistContext } from "../omdblistContext/listContext";
 import { Link } from "react-router-dom";
-import { createMovie } from "../omdblistContext/apiCalls";
+import { CreateMovie } from "../omdblistContext/apiCalls";
+import useAxiosPrivate from "../../../../../hooks/useAxiosPrivate";
 const Omdb = () => {
+  const axiosPrivate = useAxiosPrivate();
   const { query, searchMovie, movies, addMovie, getApiKey, isLoading } =
     useContext(OmdbContext);
   const { dispatch } = useContext(OmdblistContext);
@@ -29,7 +32,7 @@ const Omdb = () => {
     searchMovie(queryM);
   };
   useEffect(() => {
-    getApiKey();
+    getApiKey(axiosPrivate);
   }, [query]);
   return (
     <Stack>
@@ -101,56 +104,59 @@ const Omdb = () => {
             </center>
             {isLoading ? (
               <Center>
-                <Spinner
-                  mt={16}
-                  thickness="4px"
-                  speed="0.65s"
-                  emptyColor="purple.200"
-                  color="purple.500"
-                  size="xl"
-                />
+                <Spinner mt={16} color="purple.500" size="xl" />
               </Center>
             ) : (
               <>
                 {movies.map((movie) => {
                   return (
-                    <Flex>
-                      <Stack
-                        mt={6}
-                        direction={"row"}
-                        spacing={4}
-                        align={"center"}
-                        key={movie.imdbID}
-                      >
-                        <Image
-                          htmlHeight="75px"
-                          htmlWidth="65px"
-                          objectFit="cover"
-                          rounded={"md"}
-                          src={
-                            movie.Poster ||
-                            `https://pbs.twimg.com/media/D8tCa48VsAA4lxn.jpg`
-                          }
-                          alt={""}
-                        />
-                        <Stack direction={"column"} spacing={0} fontSize={"sm"}>
-                          <Text fontWeight={600}>{movie.Title}</Text>
-                          <Text color={"gray.500"}>{movie.Year}</Text>
-                        </Stack>
-                      </Stack>
-                      <Spacer />
-                      <Button
-                        mt={14}
-                        colorScheme="purple"
-                        size="sm"
-                        onClick={() => {
-                          createMovie(movie.imdbID, dispatch);
-                          addMovie(movie.imdbID);
-                        }}
-                      >
-                        Add
-                      </Button>
-                    </Flex>
+                    <>
+                      {movie.Poster !== "N/A" ? (
+                        <Flex>
+                          <Stack
+                            mt={6}
+                            direction={"row"}
+                            spacing={4}
+                            align={"center"}
+                            key={movie.imdbID}
+                          >
+                            <Image
+                              htmlHeight="75px"
+                              htmlWidth="65px"
+                              objectFit="cover"
+                              rounded={"md"}
+                              src={
+                                movie.Poster ||
+                                `https://pbs.twimg.com/media/D8tCa48VsAA4lxn.jpg`
+                              }
+                              alt={""}
+                            />
+                            <Stack
+                              direction={"column"}
+                              spacing={0}
+                              fontSize={"sm"}
+                            >
+                              <Text fontWeight={600}>{movie.Title}</Text>
+                              <Text color={"gray.500"}>{movie.Year}</Text>
+                            </Stack>
+                          </Stack>
+                          <Spacer />
+                          <Button
+                            mt={14}
+                            colorScheme="purple"
+                            size="sm"
+                            onClick={() => {
+                              CreateMovie(movie.imdbID, axiosPrivate, dispatch);
+                              addMovie(movie.imdbID);
+                            }}
+                          >
+                            Add
+                          </Button>
+                        </Flex>
+                      ) : (
+                        <></>
+                      )}
+                    </>
                   );
                 })}
               </>

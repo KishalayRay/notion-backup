@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   Center,
@@ -12,21 +13,26 @@ import {
   Tbody,
   Td,
 } from "@chakra-ui/react";
+import useAxiosPrivate from "../../../../hooks/useAxiosPrivate";
 import { Link } from "react-router-dom";
 import { DeleteIcon, RepeatIcon } from "@chakra-ui/icons";
 import { useContext, useEffect } from "react";
 import { StockDatalistContext } from "./stockDatalistContext/listContext";
 
-import { getStocks, deleteStock } from "./stockDatalistContext/apiCalls";
+import { GetStocks, DeleteStock } from "./stockDatalistContext/apiCalls";
 const StockData = () => {
+  const [load, setLoad] = useState(false);
+  const axiosPrivate = useAxiosPrivate();
   const { dispatch, stockData } = useContext(StockDatalistContext);
 
   useEffect(() => {
-    getStocks(dispatch);
+    GetStocks(axiosPrivate, dispatch);
   }, [dispatch]);
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
+    setLoad(true);
     console.log(id);
-    deleteStock(id, dispatch);
+    await DeleteStock(id, axiosPrivate, dispatch);
+    setLoad(false);
   };
 
   return (
@@ -95,7 +101,13 @@ const StockData = () => {
                       <Td>{stock.stockDayHigh}</Td>
                       <Td>{stock.stockDayLow}</Td>
                       <Td>
-                        <DeleteIcon onClick={() => handleDelete(stock._id)} />
+                        <Button
+                          size="sm"
+                          isLoading={load ? true : false}
+                          onClick={() => handleDelete(stock._id)}
+                        >
+                          <DeleteIcon />
+                        </Button>
                       </Td>
                     </Tr>
                   );

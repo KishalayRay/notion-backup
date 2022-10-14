@@ -1,4 +1,3 @@
-import axios from "axios";
 import {
   createApiAuthStart,
   createApiAuthSuccess,
@@ -11,20 +10,10 @@ import {
   deleteApiAuthFailure,
 } from "./ApiAuthActions";
 
-export const createApiAuth = async (apiAuth, dispatch) => {
+export const CreateApiAuth = async (apiAuth, axiosPrivate, dispatch) => {
   dispatch(createApiAuthStart);
   try {
-    const response = await axios.post(
-      `http://localhost:8000/api/v1/notionconfig/newauth/`,
-      apiAuth,
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    const response = await axiosPrivate.post(`/notionconfig/newauth/`, apiAuth);
     dispatch(createApiAuthSuccess(response.data.data.NotionApi));
     console.log(response.data.data);
   } catch (error) {
@@ -32,20 +21,10 @@ export const createApiAuth = async (apiAuth, dispatch) => {
     dispatch(createApiAuthFailure);
   }
 };
-export const getApiAuth = async (apiAuth, dispatch) => {
+export const GetApiAuth = async (apiAuth, axiosPrivate, dispatch) => {
   dispatch(getApiAuthStart);
   try {
-    const response = await axios.post(
-      `http://localhost:8000/api/v1/notionconfig/auth/`,
-      apiAuth,
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    const response = await axiosPrivate.post(`/notionconfig/auth/`, apiAuth);
     console.log(response.data.data.NotionApi);
     dispatch(getApiAuthSuccess(response.data.data.NotionApi));
   } catch (e) {
@@ -53,22 +32,12 @@ export const getApiAuth = async (apiAuth, dispatch) => {
     dispatch(getApiAuthFailure);
   }
 };
-export const deleteApiAuth = async (apiAuth, dispatch) => {
+export const DeleteApiAuth = async (apiAuth, axiosPrivate, dispatch) => {
   dispatch(deleteApiAuthStart);
   try {
-    const response = await axios.post(
-      `http://localhost:8000/api/v1/notionconfig/`,
-      apiAuth,
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
-    console.log(response.data.data.NotionApi);
-    dispatch(deleteApiAuthSuccess(response.data.data.NotionApi));
+    const response = await axiosPrivate.post(`/notionconfig/`, apiAuth);
+    console.log();
+    dispatch(deleteApiAuthSuccess());
   } catch (e) {
     console.log(e);
     dispatch(deleteApiAuthFailure);

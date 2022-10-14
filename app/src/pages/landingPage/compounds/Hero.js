@@ -8,7 +8,7 @@ import {
   Icon,
   IconProps,
 } from "@chakra-ui/react";
-
+import { Link } from "react-router-dom";
 export default function CallToActionWithIllustration() {
   return (
     <Container maxW={"5xl"}>
@@ -34,15 +34,17 @@ export default function CallToActionWithIllustration() {
           smart “Daily Agenda” every morning.
         </Text>
         <Stack spacing={6} direction={"row"}>
-          <Button
-            rounded={"full"}
-            px={6}
-            colorScheme={"purple"}
-            bg={"purple.500"}
-            _hover={{ bg: "purple.500" }}
-          >
-            Get started
-          </Button>
+          <Link to="/login">
+            <Button
+              rounded={"full"}
+              px={6}
+              colorScheme={"purple"}
+              bg={"purple.500"}
+              _hover={{ bg: "purple.500" }}
+            >
+              Get started
+            </Button>
+          </Link>
           <Button rounded={"full"} px={6}>
             Learn more
           </Button>

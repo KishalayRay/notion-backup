@@ -9,6 +9,7 @@ import {
   ListItem,
   Text,
   useColorModeValue as mode,
+  Tooltip,
 } from "@chakra-ui/react";
 import { HiArrowNarrowRight, HiCheckCircle } from "react-icons/hi";
 
@@ -56,6 +57,7 @@ export const PricingCard = (props) => {
     onClick,
     price,
     duration,
+    subscribed,
     colorScheme: c,
     ...rest
   } = props;
@@ -82,6 +84,7 @@ export const PricingCard = (props) => {
           <Button
             onClick={() => onClick(id)}
             size="lg"
+            isDisabled={subscribed === "Free" ? false : true}
             w="full"
             colorScheme={c}
             rightIcon={<HiArrowNarrowRight />}

@@ -1,4 +1,5 @@
 import { useEffect, createContext, useReducer } from "react";
+
 import cryptoJS from "crypto-js";
 import axios from "axios";
 import Reducer from "./reducer";
@@ -17,10 +18,24 @@ export const OmdbContextProvider = ({ children }) => {
 
   const fetachAPI = async (api) => {
     dispatch("SET_LOADING");
+    //let cancelToken;
+    // if (typeof cancelToken !== typeof undefined) {
+    //   cancelToken.cancel("Operation canceled by the user.");
+    // }
+    // cancelToken = axios.CancelToken.source();
+    //{ cancelToken: cancelToken.token }
     try {
       const response = await axios.get(api);
-      const data = response.data;
+      const data = await response.data;
       console.log(data);
+      if (data.Error === "Movie not found!" && data.Response === "False") {
+        dispatch({
+          type: "GET_MOVIES",
+          payload: {
+            movies: [],
+          },
+        });
+      }
       if (data.Search) {
         dispatch({
           type: "GET_MOVIES",
@@ -46,24 +61,12 @@ export const OmdbContextProvider = ({ children }) => {
     });
   };
 
-  const getApiKey = async () => {
-    const response = await axios.post(
-      `http://localhost:8000/api/v1/apiconfig/key`,
-      { apiSlug: "Omdb" },
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
-    const hashedData = response.data.data.ApiKey.keys[0].key;
-    console.log(hashedData);
-    const apiKey = cryptoJS.AES.decrypt(
-      hashedData,
-      "3DNFRo2no81p8KUEIN47B%$^&6c4876"
-    ).toString(cryptoJS.enc.Utf8);
+  const getApiKey = async (axiosPrivate) => {
+    const response = await axiosPrivate.post(`/apiconfig/key`, {
+      apiSlug: "Omdb",
+    });
+    const apiKey = response.data.data.ApiKey.keys[0].key;
+
     fetachAPI(`${API}?apikey=${apiKey}&s=${state.query}`);
   };
 

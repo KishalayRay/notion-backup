@@ -17,7 +17,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import axios from "axios";
+import axios from "../../api/axios";
 import { Link, useNavigate } from "react-router-dom";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 
@@ -28,6 +28,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [load, setLoad] = useState(false);
   const obj = {
     username: username,
     email: email,
@@ -35,21 +36,20 @@ const Register = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoad(!load);
     try {
-      const response = await axios.post(
-        `http://localhost:8000/api/v1/auth/register`,
-        obj
-      );
+      const response = await axios.post(`/auth/register`, obj);
       console.log(username, email, password);
       console.log(response.data);
       setSuccessMessage(response.data);
-
+      setLoad(false);
       // } else {
       //   return setSuccessMessage(response.data.message);
       // }
     } catch (e) {
       console.log(e.response.data.message);
       setErrorMessage(e.response.data.message);
+      setLoad(false);
     }
   };
   return (
@@ -120,24 +120,17 @@ const Register = () => {
                     setPassword(e.target.value);
                   }}
                 />
-                <InputRightElement h={"full"}>
-                  <Button
-                    variant={"ghost"}
-                    onClick={() =>
-                      setShowPassword((showPassword) => !showPassword)
-                    }
-                  >
-                    {showPassword ? <ViewIcon /> : <ViewOffIcon />}
-                  </Button>
-                </InputRightElement>
+                 
               </InputGroup>
             </FormControl>
+
             <Stack spacing={10} pt={2}>
               <Button
-                loadingText="Submitting"
+                loadingText="Signing Up"
                 size="lg"
                 bg={"purple.400"}
                 color={"white"}
+                isLoading={load ? true : false}
                 _hover={{
                   bg: "purple.500",
                 }}

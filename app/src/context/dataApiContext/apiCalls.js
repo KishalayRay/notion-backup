@@ -1,4 +1,3 @@
-import axios from "axios";
 import {
   createApiAuthStart,
   createApiAuthSuccess,
@@ -11,20 +10,12 @@ import {
   deleteApiAuthFailure,
 } from "./DataApiActions";
 
-export const createApiKey = async (apiKey, dispatch) => {
+export const CreateApiKey = async (apiKey, axiosPrivate, dispatch) => {
+  console.log(apiKey);
   dispatch(createApiAuthStart);
+
   try {
-    const response = await axios.post(
-      `http://localhost:8000/api/v1/apiconfig/newkey`,
-      apiKey,
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    const response = await axiosPrivate.post(`/apiconfig/newkey`, apiKey);
     dispatch(createApiAuthSuccess(response.data.data.ApiKey));
     console.log(response.data.data.ApiKey);
   } catch (error) {
@@ -32,20 +23,10 @@ export const createApiKey = async (apiKey, dispatch) => {
     dispatch(createApiAuthFailure);
   }
 };
-export const getApiKey = async (apiAuth, dispatch) => {
+export const GetApiKey = async (apiAuth, axiosPrivate, dispatch) => {
   dispatch(getApiAuthStart);
   try {
-    const response = await axios.post(
-      `http://localhost:8000/api/v1/apiconfig/key`,
-      apiAuth,
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    const response = await axiosPrivate.post(`/apiconfig/key`, apiAuth);
     console.log(response.data.data.ApiKey);
     dispatch(getApiAuthSuccess(response.data.data.ApiKey));
   } catch (e) {
@@ -53,22 +34,13 @@ export const getApiKey = async (apiAuth, dispatch) => {
     dispatch(getApiAuthFailure);
   }
 };
-export const deleteApiKey = async (apiAuth, dispatch) => {
+export const DeleteApiKey = async (apiAuth, axiosPrivate, dispatch) => {
+  console.log(apiAuth);
   dispatch(deleteApiAuthStart);
   try {
-    const response = await axios.post(
-      `http://localhost:8000/api/v1/apiconfig/`,
-      apiAuth,
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
-    console.log(response.data.data.ApiKey);
-    dispatch(deleteApiAuthSuccess(response.data.data.ApiKey));
+    const response = await axiosPrivate.post(`/apiconfig/`, apiAuth);
+    console.log();
+    dispatch(deleteApiAuthSuccess());
   } catch (e) {
     console.log(e);
     dispatch(deleteApiAuthFailure);

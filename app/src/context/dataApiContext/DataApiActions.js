@@ -21,9 +21,8 @@ export const getApiAuthFailure = () => ({
 export const deleteApiAuthStart = () => ({
   type: "GET_APIAUTH_START",
 });
-export const deleteApiAuthSuccess = (apiAuth) => ({
+export const deleteApiAuthSuccess = () => ({
   type: "GET_APIAUTH_SUCCESS",
-  payload: apiAuth,
 });
 export const deleteApiAuthFailure = () => ({
   type: "GET_APIAUTH_FAILURE",

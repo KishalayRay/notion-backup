@@ -9,25 +9,17 @@ import {
   useBreakpointValue,
   useColorModeValue,
 } from "@chakra-ui/react";
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
 
 const Integration = () => {
+  const axiosPrivate = useAxiosPrivate();
   const [integrations, setIntegrations] = useState([]);
   useEffect(() => {
     const allIntegrations = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8000/api/v1/notionconfig/allauth`,
-          {
-            headers: {
-              token: `Bearer ${
-                JSON.parse(localStorage.getItem("user")).accessToken
-              }`,
-            },
-          }
-        );
+        const response = await axiosPrivate.get(`/notionconfig/allauth`);
         console.log(response.data.data.NotionApi[0].credentials);
         setIntegrations(response.data.data.NotionApi[0].credentials);
       } catch (e) {

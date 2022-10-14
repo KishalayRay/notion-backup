@@ -1,4 +1,5 @@
 import axios from "axios";
+
 import cryptoJS from "crypto-js";
 
 import {
@@ -12,107 +13,62 @@ import {
   createGooglebookSuccess,
   createGooglebookFailure,
 } from "./listActions";
-export const getBooks = async (dispatch) => {
+export const GetBooks = async (axiosPrivate, dispatch) => {
   dispatch(getGooglebookStart);
   try {
-    const response = await axios.get(
-      `http://localhost:8000/api/v1/omdb/omdbs`,
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    const response = await axiosPrivate.get(`/googlebooks/books`);
 
-    dispatch(getGooglebookSuccess(response.data.data.Omdb));
-    console.log(response.data.data.Omdb);
+    dispatch(getGooglebookSuccess(response.data.data.book));
+    console.log(response.data.data.book);
   } catch (e) {
     dispatch(getGooglebookFailure);
   }
 };
-export const createBook = async (movieId, dispatch) => {
+export const CreateBook = async (bookId, axiosPrivate, dispatch) => {
   dispatch(createGooglebookStart);
-  console.log(movieId);
+  console.log(bookId);
   try {
-    const res = await axios.post(
-      `http://localhost:8000/api/v1/apiconfig/key`,
-      { apiSlug: "Omdb" },
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
-    const hashedData = res.data.data.ApiKey.keys[0].key;
-    console.log(hashedData);
-    const apiKey = cryptoJS.AES.decrypt(
-      hashedData,
-      "3DNFRo2no81p8KUEIN47B%$^&6c4876"
-    ).toString(cryptoJS.enc.Utf8);
+    const res = await axiosPrivate.post(`/apiconfig/key`, {
+      apiSlug: "Googlebooks",
+    });
+    const apiKey = res.data.data.ApiKey.keys[0].key;
+
     const response = await axios.get(
-      `http://www.omdbapi.com/?apikey=${apiKey}&i=${movieId}`
+      `https://www.googleapis.com/books/v1/volumes/${bookId}?key=${apiKey}`
     );
-    const movie = response.data;
-    console.log(movie);
-    const movieObject = {
-      movieId: movie.imdbID,
-      movieTitle: movie.Title,
-      movieImage: movie.Poster,
-      movieGenre: movie.Genre,
-      movieDuration: movie.Runtime,
-      movieRating: movie.imdbRating,
-      movieYear: movie.Year,
+    const book = response.data;
+    console.log(book);
+    const bookObject = {
+      bookId: book.id,
+      bookTitle: book.volumeInfo.title,
+      bookCover: book.volumeInfo.imageLinks.smallThumbnail,
+      bookCategory: book.volumeInfo.categories[0],
+      bookAuthor: book.volumeInfo.authors[0],
+      bookPage: book.volumeInfo.pageCount,
     };
 
-    const postData = await axios.post(
-      `http://localhost:8000/api/v1/omdb/newomdb`,
-      {
-        movieId: movie.imdbID,
-        movieTitle: movie.Title,
-        movieImage: movie.Poster,
-        movieGenre: movie.Genre,
-        movieDuration: movie.Runtime,
-        movieRating: movie.imdbRating,
-        movieYear: movie.Year,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    const postData = await axiosPrivate.post(`/googlebooks/newbook`, {
+      bookId: book.id,
+      bookTitle: book.volumeInfo.title,
+      bookCover: book.volumeInfo.imageLinks.smallThumbnail,
+      bookCategory: book.volumeInfo.categories[0],
+      bookAuthor: book.volumeInfo.authors[0],
+      bookPage: book.volumeInfo.pageCount,
+    });
     console.log(postData.data);
-    console.log(movieObject);
-    dispatch(createGooglebookSuccess(movieObject));
+    console.log(bookObject);
+    dispatch(createGooglebookSuccess(bookObject));
   } catch (e) {
     console.log(e);
     dispatch(createGooglebookFailure);
   }
 };
 
-export const deleteBook = async (id, dispatch) => {
+export const DeleteBook = async (id, axiosPrivate, dispatch) => {
   dispatch(deleteGooglebookStart);
 
   try {
-    await axios.put(
-      `http://localhost:8000/api/v1/omdb/${id}`,
-      {},
-      {
-        headers: {
-          token: `Bearer ${
-            JSON.parse(localStorage.getItem("user")).accessToken
-          }`,
-        },
-      }
-    );
+    await axiosPrivate.put(`/googlebooks/${id}`, {});
 
     dispatch(deleteGooglebookSuccess(id));
   } catch (e) {

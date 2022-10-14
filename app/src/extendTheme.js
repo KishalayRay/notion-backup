@@ -4,8 +4,8 @@ const myTheme = extendTheme(
   {
     colors: { ...theme.colors, brand: theme.colors.purple },
     fonts: {
-      heading: `'Open Sans', sans-serif`,
-      body: `'Raleway', sans-serif`,
+      heading: `"Inter var", "Inter UI", Inter, -apple-system, system-ui, "Segoe UI", Roboto, Noto, Oxygen-Sans, Ubuntu, Cantrell, "Helvetica Neue", sans-serif`,
+      body: `"Inter var", "Inter UI", Inter, -apple-system, system-ui, "Segoe UI", Roboto, Noto, Oxygen-Sans, Ubuntu, Cantrell, "Helvetica Neue", sans-serif`,
     },
   },
   theme

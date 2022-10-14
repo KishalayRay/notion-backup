@@ -20,11 +20,11 @@ import {
   Text,
   Select,
 } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
-import { DeleteIcon, RepeatIcon } from "@chakra-ui/icons";
+import useAxiosPrivate from "../../../../hooks/useAxiosPrivate";
+
 import { CalendarificContext } from "./CalendarificContext/listContext";
 
-import { getHolidays, createHoliday } from "./CalendarificContext/apiCalls";
+import { GetHolidays, CreateHoliday } from "./CalendarificContext/apiCalls";
 
 const countries = [
   { code: "AF", code3: "AFG", name: "Afghanistan", number: "004" },
@@ -424,15 +424,19 @@ const countries = [
 ];
 
 const Calendarific = () => {
+  const axiosPrivate = useAxiosPrivate();
   const { dispatch, holiday } = useContext(CalendarificContext);
   const [code, setCode] = useState("");
+  const [load, setLoad] = useState(false);
   useEffect(() => {
-    getHolidays(dispatch);
+    GetHolidays(axiosPrivate, dispatch);
   }, [dispatch]);
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoad(true);
     console.log(code);
-    createHoliday(code, dispatch);
+    await CreateHoliday(code, axiosPrivate, dispatch);
+    setLoad(false);
   };
 
   return (
@@ -471,8 +475,14 @@ const Calendarific = () => {
                     );
                   })}
                 </Select>
+
                 {holiday.length === 0 && (
-                  <Button colorScheme="purple" onClick={handleSubmit}>
+                  <Button
+                    colorScheme="purple"
+                    loadingText="Submitting"
+                    onClick={handleSubmit}
+                    isLoading={load ? true : false}
+                  >
                     Submit
                   </Button>
                 )}
@@ -513,7 +523,7 @@ const Calendarific = () => {
                   return (
                     <Tr key={day._id}>
                       <Td>{day.name}</Td>
-                      <Td>{day.date}</Td>
+                      <Td>{day.date.substring(0, 10)}</Td>
                     </Tr>
                   );
                 })}

@@ -2,10 +2,16 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
 import { ChakraProvider } from "@chakra-ui/react";
 import myTheme from "./extendTheme";
-import { AuthContextProvider } from "./context/authContext/AuthContext";
+import { AuthProvider } from "./context/authContext/AuthContext";
 
 import { ApiAuthContextProvider } from "./context/apiAuthContext/ApiAuthContext";
 import { DataApiContextProvider } from "./context/dataApiContext/DataApiContext";
@@ -15,36 +21,73 @@ import { StockDataContextProvider } from "./components/integrations/apis/StockDa
 import { StockDatalistContextProvider } from "./components/integrations/apis/StockData/stockDatalistContext/listContext";
 import { UnsplashContextProvider } from "./components/integrations/apis/Unsplash/context/context";
 import { CalendarificContextProvider } from "./components/integrations/apis/Calenderific/CalendarificContext/listContext";
+import { GoogleJobsContextProvider } from "./components/integrations/apis/GoogleJobs/GoogleJobsContext/listContext";
+import { GoogleKeywordContextProvider } from "./components/integrations/apis/GoogleKeyword/GoogleKeywordContext/listContext";
+import { TheNewsApiContextProvider } from "./components/integrations/apis/TheNewsApi/TheNewsApiContext/listContext";
 import { GooglebooksContextProvider } from "./components/integrations/apis/Googlebooks/context/context";
 import { GooglebookslistContextProvider } from "./components/integrations/apis/Googlebooks/googlebookslistContext/listContext";
+import { SpoonacularContextProvider } from "./components/integrations/apis/Spoonacular/context/context";
+import { SpoonacularlistContextProvider } from "./components/integrations/apis/Spoonacular/SpoonacularlistContext/listContext";
+import { CaloriesBurnedContextProvider } from "./components/integrations/apis/CaloriesBurned/context/context";
+import { CaloriesBurnedlistContextProvider } from "./components/integrations/apis/CaloriesBurned/caloriesBurnedlistContext/listContext";
+import { BigPictureContextProvider } from "./components/integrations/apis/Bigpicture/context/context";
+import { BigPicturelistContextProvider } from "./components/integrations/apis/Bigpicture/BigPicturelistContext/listContext";
+import { HunterContextProvider } from "./components/integrations/apis/Hunter/HunterContext/listContext";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <ChakraProvider theme={myTheme}>
-      <AuthContextProvider>
-        <ApiAuthContextProvider>
-          <DataApiContextProvider>
-            <OmdbContextProvider>
-              <OmdblistContextProvider>
-                <StockDataContextProvider>
-                  <StockDatalistContextProvider>
-                    <UnsplashContextProvider>
-                      <CalendarificContextProvider>
-                        <GooglebooksContextProvider>
-                          <GooglebookslistContextProvider>
-                            <App />
-                          </GooglebookslistContextProvider>
-                        </GooglebooksContextProvider>
-                      </CalendarificContextProvider>
-                    </UnsplashContextProvider>
-                  </StockDatalistContextProvider>
-                </StockDataContextProvider>
-              </OmdblistContextProvider>
-            </OmdbContextProvider>
-          </DataApiContextProvider>
-        </ApiAuthContextProvider>
-      </AuthContextProvider>
-    </ChakraProvider>
+    <Router>
+      <ChakraProvider theme={myTheme}>
+        <AuthProvider>
+          <ApiAuthContextProvider>
+            <DataApiContextProvider>
+              <OmdbContextProvider>
+                <OmdblistContextProvider>
+                  <StockDataContextProvider>
+                    <StockDatalistContextProvider>
+                      <UnsplashContextProvider>
+                        <CalendarificContextProvider>
+                          <GooglebooksContextProvider>
+                            <GooglebookslistContextProvider>
+                              <TheNewsApiContextProvider>
+                                <SpoonacularContextProvider>
+                                  <SpoonacularlistContextProvider>
+                                    <CaloriesBurnedContextProvider>
+                                      <CaloriesBurnedlistContextProvider>
+                                        <GoogleJobsContextProvider>
+                                          <GoogleKeywordContextProvider>
+                                            <BigPictureContextProvider>
+                                              <BigPicturelistContextProvider>
+                                                <HunterContextProvider>
+                                                  <Routes>
+                                                    <Route
+                                                      path="/*"
+                                                      element={<App />}
+                                                    />
+                                                  </Routes>
+                                                </HunterContextProvider>
+                                              </BigPicturelistContextProvider>
+                                            </BigPictureContextProvider>
+                                          </GoogleKeywordContextProvider>
+                                        </GoogleJobsContextProvider>
+                                      </CaloriesBurnedlistContextProvider>
+                                    </CaloriesBurnedContextProvider>
+                                  </SpoonacularlistContextProvider>
+                                </SpoonacularContextProvider>
+                              </TheNewsApiContextProvider>
+                            </GooglebookslistContextProvider>
+                          </GooglebooksContextProvider>
+                        </CalendarificContextProvider>
+                      </UnsplashContextProvider>
+                    </StockDatalistContextProvider>
+                  </StockDataContextProvider>
+                </OmdblistContextProvider>
+              </OmdbContextProvider>
+            </DataApiContextProvider>
+          </ApiAuthContextProvider>
+        </AuthProvider>
+      </ChakraProvider>
+    </Router>
   </React.StrictMode>
 );
 

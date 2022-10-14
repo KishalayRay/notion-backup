@@ -13,13 +13,15 @@ import {
   Input,
   Spinner,
 } from "@chakra-ui/react";
+import useAxiosPrivate from "../../../../../hooks/useAxiosPrivate";
 import { useContext, useEffect, useState } from "react";
 import { RepeatIcon } from "@chakra-ui/icons";
 import { GooglebooksContext } from "../context/context";
 import { GooglebookslistContext } from "../googlebookslistContext/listContext";
 import { Link } from "react-router-dom";
-import { createBook } from "../googlebookslistContext/apiCalls";
+import { CreateBook } from "../googlebookslistContext/apiCalls";
 const Googlebooks = () => {
+  const axiosPrivate = useAxiosPrivate();
   const { query, searchBook, books, addBook, getApiKey, isLoading } =
     useContext(GooglebooksContext);
   const { dispatch } = useContext(GooglebookslistContext);
@@ -29,7 +31,7 @@ const Googlebooks = () => {
     searchBook(queryM);
   };
   useEffect(() => {
-    getApiKey();
+    getApiKey(axiosPrivate);
   }, [query]);
   return (
     <Stack>
@@ -101,18 +103,11 @@ const Googlebooks = () => {
             </center>
             {isLoading ? (
               <Center>
-                <Spinner
-                  mt={16}
-                  thickness="4px"
-                  speed="0.65s"
-                  emptyColor="purple.200"
-                  color="purple.500"
-                  size="xl"
-                />
+                <Spinner mt={16} color="purple.500" size="xl" />
               </Center>
             ) : (
               <>
-                {books.map((book) => {
+                {books.map((volume) => {
                   return (
                     <Flex>
                       <Stack
@@ -120,7 +115,7 @@ const Googlebooks = () => {
                         direction={"row"}
                         spacing={4}
                         align={"center"}
-                        key={book.id}
+                        key={volume.id}
                       >
                         <Image
                           htmlHeight="75px"
@@ -128,15 +123,17 @@ const Googlebooks = () => {
                           objectFit="cover"
                           rounded={"sm"}
                           src={
-                            book.volumeInfo.imageLinks.smallThumbnail ||
+                            volume.volumeInfo.imageLinks.smallThumbnail ||
                             `https://pbs.twimg.com/media/D8tCa48VsAA4lxn.jpg`
                           }
                           alt={""}
                         />
                         <Stack direction={"column"} spacing={0} fontSize={"sm"}>
-                          <Text fontWeight={600}>{book.volumeInfo.title}</Text>
+                          <Text fontWeight={600}>
+                            {volume.volumeInfo.title}
+                          </Text>
                           <Text color={"gray.500"}>
-                            {book.volumeInfo.publishedDate}
+                            {volume.volumeInfo.publishedDate}
                           </Text>
                         </Stack>
                       </Stack>
@@ -146,8 +143,8 @@ const Googlebooks = () => {
                         colorScheme="purple"
                         size="sm"
                         onClick={() => {
-                          createBook(book.id, dispatch);
-                          addBook(book.id);
+                          CreateBook(volume.id, axiosPrivate, dispatch);
+                          addBook(volume.id);
                         }}
                       >
                         Add

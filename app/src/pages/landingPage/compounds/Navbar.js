@@ -37,14 +37,12 @@ const Navbar = () => {
                   </Button>
                 </ButtonGroup>
                 <HStack spacing="3">
-                  <Button variant="ghost">
-                    {" "}
-                    <Link to="/login">Sign in</Link>{" "}
-                  </Button>
-                  <Button variant="primary">
-                    {" "}
-                    <Link to="/register">Sign up</Link>
-                  </Button>
+                  <Link to="/login">
+                    <Button variant="ghost"> Sign in </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button variant="primary"> Sign up</Button>
+                  </Link>
                 </HStack>
               </Flex>
             ) : (
