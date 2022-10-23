@@ -38,6 +38,7 @@ const Login = () => {
         email: email,
         password: password,
       });
+      localStorage.setItem("useremail", email);
       setAuth({
         isAdmin: response.data.data.user.isAdmin,
         accessToken: response.data.data.accessToken,

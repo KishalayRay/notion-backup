@@ -48,14 +48,16 @@ const App = () => {
       <Route path="/auth/activate/password/reset/:token" element={<Reset />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
-    
+
       <Route path="*" element={<PageNotFound />} />
       <Route path="/*" element={<Layout />}>
         <Route elelment={<PersistLogin />}>
           <Route element={<RequireAuth />}>
             <Route path="upgrade" element={<Pricing />} />
 
-            <Route path="apis" element={<ListListContainer />} />
+            {localStorage.getItem("useremail") && (
+              <Route path="apis" element={<ListListContainer />} />
+            )}
 
             <Route path="integrations" element={<IntegrationContainer />} />
 
