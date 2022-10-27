@@ -12,12 +12,14 @@ import {
   createOmdbSuccess,
   createOmdbFailure,
 } from "./listActions";
-export const GetMovies = async (axiosPrivate, dispatch) => {
+export const GetMovies = async (axiosPrivate, dispatch, pageId) => {
   dispatch(getOmdbStart);
   try {
-    const response = await axiosPrivate.get(`/omdb/omdbs`);
+    const response = await axiosPrivate.get(`/omdb/omdbs?page=${pageId}`);
 
-    dispatch(getOmdbSuccess(response.data.data.Omdb));
+    dispatch(
+      getOmdbSuccess(response.data.data.Omdb, response.data.data.pageCount)
+    );
     console.log(response.data.data.Omdb);
   } catch (e) {
     dispatch(getOmdbFailure);

@@ -136,10 +136,11 @@ exports.createOmdb = async (req, res, next) => {
 };
 exports.getOmdbs = async (req, res, next) => {
   const page = req.query.page * 1 || 1;
-  const limit = 5;
+  const limit = 6;
   const skip = (page - 1) * limit;
+  const numOmdbs = await Omdb.countDocuments();
+  const pageCount = Math.ceil(numOmdbs / limit);
   if (req.query.page) {
-    const numOmdbs = await Omdb.countDocuments();
     if (skip > numOmdbs) {
       return next(
         createError(400, "This page does not existThis page does not exist")
@@ -148,10 +149,15 @@ exports.getOmdbs = async (req, res, next) => {
   }
   const userId = req.user.id;
   try {
-    const movies = await Omdb.find({ users: userId });
+    const movies = await Omdb.find({ users: userId })
+
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
     res.status(200).json({
       data: {
         count: movies.length,
+        pageCount: pageCount,
         Omdb: movies,
       },
     });
@@ -219,9 +225,9 @@ exports.deleteOmdb = async (req, res, next) => {
       { new: true }
     );
     console.log(deletePage, "Notion Page");
-    const emptyDB = await Omdb.findByIdAndUpdate({
+    const emptyDB = await Omdb.findById({
       _id: req.params.id,
-      users: [],
+      users: { $size: 0 },
     });
     if (emptyDB) {
       await Omdb.findByIdAndDelete(req.params.id);

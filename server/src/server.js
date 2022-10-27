@@ -14,7 +14,7 @@ const HOST = "0.0.0.0";
 app.use(helmet());
 
 app.use(cookieParser());
-app.use(cors({ credentials: true, origin: "http://localhost:3000" })); //http://localhost:8080
+app.use(cors({ credentials: true, origin: true })); //http://localhost:8080
 const authRoute = require("./routes/configRoutes/authRoute");
 const apiListRoute = require("./routes/configRoutes/apiListRoute");
 const apiConfigRoute = require("./routes/configRoutes/apiConfigRoute");
@@ -34,6 +34,8 @@ const googleJobsApi = require("./routes/dataApiRoutes/googleJobsApiRoute");
 const googleKeyword = require("./routes/dataApiRoutes/googleKeywordApiRoute");
 const bigPictureApi = require("./routes/dataApiRoutes/bigPictureApiRoute");
 const hunterApi = require("./routes/dataApiRoutes/hunterApiRoute");
+const coinRankingApi = require("./routes/dataApiRoutes/coinRankingApiRoute");
+const triposoApi = require("./routes/dataApiRoutes/triposoApiRoute");
 //cron jobs
 const {
   stockdataUpdate,
@@ -72,6 +74,8 @@ app.use("/api/v1/googlejobs", googleJobsApi);
 app.use("/api/v1/googlekeyword", googleKeyword);
 app.use("/api/v1/bigpicture", bigPictureApi);
 app.use("/api/v1/hunter", hunterApi);
+app.use("/api/v1/coinranking", coinRankingApi);
+app.use("/api/v1/triposo", triposoApi);
 app.use("/api/v1/subs", subs);
 
 // cron.schedule("1 * 0 * * *", function () {

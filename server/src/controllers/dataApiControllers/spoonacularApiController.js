@@ -165,7 +165,9 @@ exports.getRecipes = async (req, res, next) => {
   }
   const userId = req.user.id;
   try {
-    const recipes = await Spoonacular.find({ users: userId });
+    const recipes = await Spoonacular.find({ users: userId }).sort({
+      createdAt: -1,
+    });
     res.status(200).json({
       data: {
         count: recipes.length,

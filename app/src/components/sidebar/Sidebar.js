@@ -112,6 +112,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
   const [user, setUser] = useState({});
   const signOut = async () => {
     await logout();
+
     navigate("/");
   };
   const fetchUser = async () => {

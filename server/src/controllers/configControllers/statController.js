@@ -30,10 +30,10 @@ exports.getStats = async (req, res, next) => {
 
     res.status(200).json({
       data: {
-        integrations: integrations[0].total,
+        integrations: integrations[0] || 0,
 
-        keys: keys[0].total,
-        active: active[0].age,
+        keys: keys[0] || 0,
+        active: active[0] || 0,
       },
     });
   } catch (error) {

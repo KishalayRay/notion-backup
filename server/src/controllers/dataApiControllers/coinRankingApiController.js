@@ -1,34 +1,34 @@
-const StockData = require("../../models/StockData");
+const Coin = require("../../models/CoinRankig");
 const cryptoJS = require("crypto-js");
 const NotionApiKey = require("../../models/NotionKey");
 const Apikey = require("../../models/ApiKey");
-const NotionStockDataPage = require("../../models/NotionStockDataPage");
+const NotionCoinDataPage = require("../../models/NotionCoinRankingPage");
 const { Client } = require("@notionhq/client");
 const { createError } = require("../../utils/error");
 const axios = require("axios");
 //const APiKeys = require("../../models/ApiKeys");
-exports.createStock = async (req, res, next) => {
+exports.createCoin = async (req, res, next) => {
   try {
-    const stock = await StockData.findOne({
-      $and: [{ stockSymbol: req.body.stockSymbol }, { users: req.user.id }],
+    const coin = await Coin.findOne({
+      $and: [{ coinSymbol: req.body.coinSymbol }, { users: req.user.id }],
     });
-    console.log(stock);
-    if (stock) {
+    console.log(coin);
+    if (coin) {
       return next(createError(400, "Data already Inserted"));
     }
     const update = {
       $set: {
-        stockSymbol: req.body.stockSymbol,
-        stockPrice: parseFloat(req.body.stockPrice),
-        stockDayChange: parseFloat(req.body.stockDayChange),
-        stockDayChangeParcentage: parseFloat(req.body.stockDayChangeParcentage),
-        stockDayHigh: parseFloat(req.body.stockDayHigh),
-        stockDayLow: parseFloat(req.body.stockDayLow),
+        coinSymbol: req.body.coinSymbol,
+        coinPrice: req.body.coinPrice,
+        coinDayChange: req.body.coinDayChange,
+        coinCirculation: req.body.coinCirculation,
+        coinRank: req.body.coinRank,
+        coinMarketCap: req.body.coinMarketCap,
       },
       $push: { users: req.user.id },
     };
 
-    await StockData.updateOne({ stockSymbol: req.body.stockSymbol }, update, {
+    await Coin.updateOne({ coinSymbol: req.body.coinSymbol }, update, {
       upsert: true,
     });
     // notion update
@@ -37,10 +37,10 @@ exports.createStock = async (req, res, next) => {
       {
         $and: [
           { user: req.user.id },
-          { credentials: { $elemMatch: { apiSlug: "Alphavantage" } } },
+          { credentials: { $elemMatch: { apiSlug: "Coinranking" } } },
         ],
       },
-      { credentials: { $elemMatch: { apiSlug: "Alphavantage" } } }
+      { credentials: { $elemMatch: { apiSlug: "Coinranking" } } }
     );
     console.log(notionCredential);
     const dataBaseId = notionCredential.credentials[0].databaseId;
@@ -66,43 +66,43 @@ exports.createStock = async (req, res, next) => {
           database_id: dataBaseId,
         },
         properties: {
-          Stock: {
+          Coin: {
             title: [
               {
                 type: "text",
                 text: {
-                  content: req.body.stockSymbol,
+                  content: req.body.coinSymbol,
                 },
               },
             ],
           },
           Price: {
-            number: parseFloat(req.body.stockPrice),
+            number: req.body.coinPrice,
           },
           Day_Change: {
-            number: parseFloat(req.body.stockDayChange),
+            number: req.body.coinDayChange,
           },
-          Change_Parcentage: {
-            number: parseFloat(req.body.stockDayChangeParcentage) / 100.0,
+          Market_Cap: {
+            number: req.body.coinMarketCap,
           },
-          Todays_High: {
-            number: parseFloat(req.body.stockDayHigh),
+          "Circulating Supply": {
+            number: req.body.coinCirculation,
           },
-          Todays_Low: {
-            number: parseFloat(req.body.stockDayLow),
+          Rank: {
+            number: req.body.coinRank,
           },
         },
       });
 
       const body = {
-        stockSymbol: req.body.stockSymbol,
+        coinSymbol: req.body.coinSymbol,
         pageId: response.id,
       };
       const update = {
         $set: { user: req.user.id },
         $push: { associateIds: body },
       };
-      const createPage = await NotionStockDataPage.updateOne(
+      const createPage = await NotionCoinDataPage.updateOne(
         { user: req.user.id },
         update,
         {
@@ -123,13 +123,13 @@ exports.createStock = async (req, res, next) => {
     next(error);
   }
 };
-exports.getStocks = async (req, res, next) => {
+exports.getCoins = async (req, res, next) => {
   const page = req.query.page * 1 || 1;
   const limit = 5;
   const skip = (page - 1) * limit;
   if (req.query.page) {
-    const numOmdbs = await Omdb.countDocuments();
-    if (skip > numOmdbs) {
+    const numCoins = await Coin.countDocuments();
+    if (skip > Day_Change) {
       return next(
         createError(400, "This page does not existThis page does not exist")
       );
@@ -137,11 +137,11 @@ exports.getStocks = async (req, res, next) => {
   }
   const userId = req.user.id;
   try {
-    const stocks = await StockData.find({ users: userId });
+    const coins = await Coin.find({ users: userId });
     res.status(200).json({
       data: {
-        count: stocks.length,
-        Stock: stocks,
+        count: coins.length,
+        coin: coins,
       },
     });
   } catch (error) {
@@ -149,7 +149,7 @@ exports.getStocks = async (req, res, next) => {
     next(error);
   }
 };
-exports.deleteStock = async (req, res, next) => {
+exports.deleteCoin = async (req, res, next) => {
   try {
     const userId = req.user.id;
     console.log(userId);
@@ -157,30 +157,27 @@ exports.deleteStock = async (req, res, next) => {
       $pull: { users: userId },
     };
 
-    await StockData.findByIdAndUpdate({ _id: req.params.id }, update, {
+    await Coin.findByIdAndUpdate({ _id: req.params.id }, update, {
       new: true,
     });
-    const associateStock = await StockData.findById({ _id: req.params.id });
-    const stockSymbol = associateStock.stockSymbol;
+    const associateCoin = await Coin.findById({ _id: req.params.id });
+    const coinSymbol = associateCoin.coinSymbol;
 
-    const pageDetail = await NotionStockDataPage.findOne(
+    const pageDetail = await NotionCoinDataPage.findOne(
       {
         $and: [
           { user: req.user.id },
-          { associateIds: { $elemMatch: { stockSymbol: stockSymbol } } },
+          { associateIds: { $elemMatch: { coinSymbol: coinSymbol } } },
         ],
       },
-      { associateIds: { $elemMatch: { stockSymbol: stockSymbol } } }
+      { associateIds: { $elemMatch: { coinSymbol: coinSymbol } } }
     );
     console.log(pageDetail.associateIds[0].pageId);
     const notionCredential = await NotionApiKey.findOne(
       {
-        $and: [
-          { user: req.user.id },
-          { "credentials.apiSlug": "Alphavantage" },
-        ],
+        $and: [{ user: req.user.id }, { "credentials.apiSlug": "Coinranking" }],
       },
-      { credentials: { $elemMatch: { apiSlug: "Alphavantage" } } }
+      { credentials: { $elemMatch: { apiSlug: "Coinranking" } } }
     );
     console.log(notionCredential);
     const notionKey = notionCredential.credentials[0].apiKey;
@@ -192,18 +189,18 @@ exports.deleteStock = async (req, res, next) => {
         associateIds: { stockSymbol: stockSymbol },
       },
     };
-    const deletePage = await NotionStockDataPage.updateOne(
+    const deletePage = await NotionCoinDataPage.updateOne(
       { user: req.user.id },
       updatePage,
       { new: true }
     );
     console.log(deletePage, "Notion Page");
-    const emptyDB = await StockData.findByIdAndUpdate({
+    const emptyDB = await Coin.findByIdAndUpdate({
       _id: req.params.id,
       users: [],
     });
     if (emptyDB) {
-      await StockData.findByIdAndDelete(req.params.id);
+      await Coin.findByIdAndDelete(req.params.id);
     }
     const deleteNotionPage = async () => {
       const page = pageDetail.associateIds[0].pageId;
@@ -229,77 +226,62 @@ exports.deleteStock = async (req, res, next) => {
     next(error);
   }
 };
-exports.updateStock = async () => {
-  let page = 1;
-  const limit = 5;
-  let skip = 0;
-  let i = 0;
-  const stocksCount = await StockData.countDocuments();
-  const loop = Math.ceil(stocksCount / limit);
-  if (skip > stocksCount) {
-    return next(
-      createError(400, "This page does not existThis page does not exist")
-    );
-  }
-  const myLoop = () => {
-    setTimeout(async () => {
-      const stocks = await StockData.find({}).skip(skip).limit(limit);
-      const apikey = await Apikey.aggregate([
-        { $unwind: "$keys" },
-        { $match: { "keys.apiSlug": "Calendarific" } },
-        { $sample: { size: 1 } },
-      ]);
-      const originalKey = apikey[0].keys.key;
-      console.log(originalKey);
-      stocks.map(async (stock) => {
-        try {
-          const response = await axios.get(
-            `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stock.stockSymbol}&apikey=${originalKey}`
-          );
-          console.log(response.data);
-          const currentStock = response.data["Global Quote"];
-          const update = await StockData.updateOne(
-            { stockSymbol: stock.stockSymbol },
-            {
-              $set: {
-                stockPrice: parseFloat(currentStock["05. price"]),
-                stockDayChange: parseFloat(currentStock["09. change"]),
-                stockDayChangeParcentage: parseFloat(
-                  currentStock["10. change percent"]
-                ),
-                stockDayHigh: parseFloat(currentStock["03. high"]),
-                stockDayLow: parseFloat(currentStock["04. low"]),
-              },
-            }
-          );
-        } catch (e) {
-          console.log(e);
+exports.updateCoin = async () => {
+  // let page = 1;
+  // const limit = 5;
+  // let skip = 0;
+  // let i = 0;
+  // const stocksCount = await StockData.countDocuments();
+  // const loop = Math.ceil(stocksCount / limit);
+  // if (skip > stocksCount) {
+  //   return next(
+  //     createError(400, "This page does not existThis page does not exist")
+  //   );
+  // }
+
+  const coins = await Coin.find({});
+  const apikey = await Apikey.aggregate([
+    { $unwind: "$keys" },
+    { $match: { "keys.apiSlug": "Coinranking" } },
+    { $sample: { size: 1 } },
+  ]);
+  const originalKey = apikey[0].keys.key;
+  console.log(originalKey);
+  coins.map(async (coin) => {
+    try {
+      const response = await axios.get(
+        `https://api.coinranking.com/v2/coins?symbols=${coin.coinSymbol}`,
+        {
+          headers: {
+            "x-access-token": originalKey,
+          },
         }
-      });
-      console.log(page, skip);
-      page++;
-      skip = (page - 1) * limit;
-      i++;
-      if (i < loop) {
-        myLoop();
-      }
-    }, 1000 * 60);
-  };
-  myLoop();
+      );
+      console.log(response.data);
+      const currentCoin = response.data.coins[0];
+      const update = await Coin.updateOne(
+        { coinSymbol: coin.coinSymbol },
+        {
+          $set: {
+            coinPrice: parseFloat(currentCoin.price),
+            coinDayChangeParcentage: parseFloat(currentCoin.change),
+            coinDayHigh: parseFloat(
+              currentCoin.sparkline[currentCoin.sparkline.length - 1]
+            ),
+            coinDayLow: parseFloat(currentCoin.sparkline[0]),
+            coinRank: parseFloat(currentCoin.rank),
+          },
+        }
+      );
+    } catch (e) {
+      console.log(e);
+    }
+  });
 };
 exports.pageDetails = async (req, res) => {
-  // const pageDetails = await NotionStockDataPage.find(
-  //   {
-  //     associateIds: {
-  //       $elemMatch: { stockSymbol: "META" },
-  //     },
-  //   },
-  //   { associateIds: { $elemMatch: { stockSymbol: "META" } } }
-  // );
-  // res.json(pageDetails);
-  const individuals = await NotionStockDataPage.find(
+  const individuals = await NotionCoinDataPage.find(
     {},
-    { "associateIds.stockSymbol": 1, "associateIds.pageId": 1, user: 1 }
+    { "associateIds.coinSymbol": 1, "associateIds.pageId": 1, user: 1 }
   );
 
   res.json(individuals);
@@ -308,10 +290,10 @@ exports.pageDetails = async (req, res) => {
       {
         $and: [
           { user: individuals[i].user },
-          { "credentials.apiSlug": "Alphavantage" },
+          { "credentials.apiSlug": "Coinranking" },
         ],
       },
-      { credentials: { $elemMatch: { apiSlug: "Alphavantage" } } }
+      { credentials: { $elemMatch: { apiSlug: "Coinranking" } } }
     );
     const dataBaseId = notionCredential.credentials[0].databaseId;
     const notionKey = notionCredential.credentials[0].apiKey;
@@ -331,47 +313,31 @@ exports.pageDetails = async (req, res) => {
       if (pageExistance.archived === true) {
         continue;
       }
-      const data = await StockData.findOne({
-        stockSymbol: individuals[i].associateIds[j].stockSymbol,
+      const data = await Coin.findOne({
+        coinSymbol: individuals[i].associateIds[j].coinSymbol,
       });
-      console.log(page, "between", data.stockSymbol);
-      const res = await notion.pages.update({
+      console.log(page, "between", data.coinSymbol);
+      await notion.pages.update({
         page_id: page,
         properties: {
           Price: {
-            number: data.stockPrice,
+            number: data.coinPrice,
           },
+
           Day_Change: {
-            number: data.stockDayChange,
-          },
-          Change_Parcentage: {
-            number: data.stockDayChangeParcentage / 100.0,
+            number: data.coinDayChangeParcentage / 100.0,
           },
           Todays_High: {
-            number: data.stockDayHigh,
+            number: data.coinkDayHigh,
           },
           Todays_Low: {
-            number: data.stockDayLow,
+            number: data.coinDayLow,
+          },
+          Rank: {
+            number: data.coinRank,
           },
         },
       });
     }
   }
-  // individuals.map(async (individual) => {
-  //   const notionCredential = await NotionApiKey.findOne(
-  //     {
-  //       $and: [
-  //         { user: individual.user },
-  //         { "credentials.apiSlug": "Alphavantage" },
-  //       ],
-  //     },
-  //     { credentials: { $elemMatch: { apiSlug: "Alphavantage" } } }
-  //   );
-  //   console.log(notionCredential);
-  //   const notionKey = cryptoJS.AES.decrypt(
-  //     notionCredential.credentials[0].apiKey,
-  //     process.env.SECRET_KEY
-  //   ).toString(cryptoJS.enc.Utf8);
-  //   console.log(notionKey);
-  // });
 };

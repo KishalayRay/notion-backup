@@ -7,7 +7,7 @@ const useLogout = () => {
 
   const logout = async () => {
     setAuth({});
-
+    localStorage.clear();
     try {
       await axios.get("/auth/logout");
       console.log(auth);

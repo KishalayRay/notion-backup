@@ -1,9 +1,9 @@
 export const getOmdbStart = () => ({
   type: "GET_MOVIES_START",
 });
-export const getOmdbSuccess = (omdb) => ({
+export const getOmdbSuccess = (omdb, pageCount) => ({
   type: "GET_MOVIES_SUCCESS",
-  payload: omdb,
+  payload: { omdb, pageCount },
 });
 export const getOmdbFailure = () => ({
   type: "GET_MOVIES_FAILURE",

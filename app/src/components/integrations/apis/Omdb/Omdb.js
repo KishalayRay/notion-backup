@@ -9,7 +9,10 @@ import {
   TableContainer,
   Table,
   Thead,
+  Badge,
   Tr,
+  Flex,
+  ButtonGroup,
   Text,
   Th,
   Tbody,
@@ -25,11 +28,13 @@ import { GetMovies, DeleteMovie } from "./omdblistContext/apiCalls";
 const Omdb = () => {
   const [load, setLoad] = useState(false);
   const axiosPrivate = useAxiosPrivate();
-  const { dispatch, omdb } = useContext(OmdblistContext);
+  const { dispatch, omdb, pageId, nextPage, prevPage, pageCount } =
+    useContext(OmdblistContext);
 
   useEffect(() => {
-    GetMovies(axiosPrivate, dispatch);
-  }, [dispatch]);
+    GetMovies(axiosPrivate, dispatch, pageId);
+    console.log(dispatch);
+  }, [dispatch, pageId]);
   const handleDelete = async (id) => {
     setLoad(true);
     console.log(id);
@@ -42,7 +47,7 @@ const Omdb = () => {
       <Center py={6}>
         <Box
           maxW={"800px"}
-          maxH={"1600px"}
+          maxH={"800px"}
           w={"full"}
           bg={useColorModeValue("white", "gray.900")}
           boxShadow={"2xl"}
@@ -73,7 +78,7 @@ const Omdb = () => {
       <Center py={6}>
         <Box
           maxW={"800px"}
-          maxH={"1600px"}
+          height={"640px"}
           w={"full"}
           bg={useColorModeValue("white", "gray.900")}
           boxShadow={"2xl"}
@@ -127,7 +132,10 @@ const Omdb = () => {
                           alt={""}
                         />
                       </Td>
-                      <Td>{movie.movieGenre}</Td>
+                      <Td>
+                        {/* <Badge variant="subtle">{movie.movieGenre}</Badge> */}
+                        {movie.movieGenre}
+                      </Td>
                       <Td>{movie.movieYear}</Td>
                       <Td>{movie.movieRating}</Td>
                       <Td>{movie.movieDuration} min</Td>
@@ -146,6 +154,30 @@ const Omdb = () => {
                 })}
               </Tbody>
             </Table>
+            <Flex align="center" justify="space-between" my="4">
+              <Text
+                color={useColorModeValue("gray.600", "gray.400")}
+                fontSize="sm"
+              >
+                {pageId} of {pageCount} pages
+              </Text>
+              <ButtonGroup variant="outline" size="sm">
+                <Button
+                  onClick={() => {
+                    prevPage();
+                  }}
+                >
+                  Previous
+                </Button>
+                <Button
+                  onClick={() => {
+                    nextPage();
+                  }}
+                >
+                  Next
+                </Button>
+              </ButtonGroup>
+            </Flex>
           </TableContainer>
         </Box>
       </Center>

@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { ApiAuthContext } from "../../context/apiAuthContext/ApiAuthContext";
 import { DataApiContext } from "../../context/dataApiContext/DataApiContext";
+import { useQuery } from "react-query";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import {
   CreateApiAuth,

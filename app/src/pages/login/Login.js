@@ -38,6 +38,7 @@ const Login = () => {
         email: email,
         password: password,
       });
+      localStorage.setItem("userEmail", email);
       setAuth({
         isAdmin: response.data.data.user.isAdmin,
         accessToken: response.data.data.accessToken,
@@ -45,6 +46,7 @@ const Login = () => {
       navigate(from, { replace: true });
     } catch (e) {
       console.log(e);
+      // setAuth({ message: "failed" });
     }
     setLoad(false);
   };

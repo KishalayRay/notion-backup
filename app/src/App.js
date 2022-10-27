@@ -32,6 +32,10 @@ import CaloriesBurnedDataApiContainer from "./components/integrations/apis/Calor
 import BigPictureContainer from "./components/integrations/apis/Bigpicture/BigPictureContainer";
 import BigPictureDataApiContainer from "./components/integrations/apis/Bigpicture/BigPictureDataApi/BigPictureDataApiContainer";
 import HunterContainer from "./components/integrations/apis/Hunter/HunterContainer";
+import CoinRankingContainer from "./components/integrations/apis/CoinRanking/CoinRankingContainer";
+import CoinRankingApiContainer from "./components/integrations/apis/CoinRanking/CoinRankingApi/CoinRankingApiContainer";
+import TriposoContainer from "./components/integrations/apis/Triposo/TriposoContainer";
+import TriposoDataApiContainer from "./components/integrations/apis/Triposo/TriposoDataApi/TriposoDataApiContainer";
 import AccountContainer from "./components/Account/AccountContainer";
 import PageNotFound from "./pages/error/PageNotFound";
 
@@ -40,91 +44,173 @@ import PersistLogin from "./pages/routeHelpers/PersistLogin";
 import useAuth from "./hooks/useAuth";
 const App = () => {
   const { auth } = useAuth();
+  const state = localStorage.getItem("userEmail");
+  console.log(state, "state", !state);
+
   return (
     <Routes>
-      <Route path="/" index element={<LandingPage />} />
-      <Route path="/auth/activate/:token" element={<EmailVerify />} />
-      <Route path="/auth/activate/password/reset" element={<Forgot />} />
-      <Route path="/auth/activate/password/reset/:token" element={<Reset />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/login" element={<Login />} />
-    
+      <Route
+        path="/"
+        index
+        element={!state ? <LandingPage /> : <Navigate replace to="/apis" />}
+        //element={<LandingPage />}
+      />
+      <Route
+        path="/auth/activate/:token"
+        element={!state ? <EmailVerify /> : <Navigate replace to="/apis" />}
+        //element={<EmailVerify />}
+      />
+      <Route
+        path="/auth/activate/password/reset"
+        element={!state ? <Forgot /> : <Navigate replace to="/apis" />}
+        //element={<Forgot />}
+      />
+      <Route
+        path="/auth/activate/password/reset/:token"
+        element={!state ? <Reset /> : <Navigate replace to="/apis" />}
+        // element={<Reset />}
+      />
+      <Route
+        path="/register"
+        element={!state ? <Register /> : <Navigate replace to="/apis" />}
+        //element={<Register />}
+      />
+      <Route
+        path="/login"
+        element={!state ? <Login /> : <Navigate replace to="/apis" />}
+        //element={<Login />}
+      />
+
       <Route path="*" element={<PageNotFound />} />
       <Route path="/*" element={<Layout />}>
         <Route elelment={<PersistLogin />}>
           <Route element={<RequireAuth />}>
-            <Route path="upgrade" element={<Pricing />} />
+            <Route
+              path="upgrade"
+              element={state ? <Pricing /> : <Navigate replace to="/" />}
+            />
 
-            <Route path="apis" element={<ListListContainer />} />
+            <Route
+              path="apis"
+              element={
+                state ? <ListListContainer /> : <Navigate replace to="/" />
+              }
+            />
 
-            <Route path="integrations" element={<IntegrationContainer />} />
+            <Route
+              path="integrations"
+              element={
+                state ? <IntegrationContainer /> : <Navigate replace to="/" />
+              }
+            />
 
-            <Route path="account" element={<AccountContainer />} />
+            <Route
+              path="account"
+              element={
+                state ? <AccountContainer /> : <Navigate replace to="/" />
+              }
+            />
 
-            <Route path="usage" element={<StatContainer />} />
+            <Route
+              path="usage"
+              element={state ? <StatContainer /> : <Navigate replace to="/" />}
+            />
 
-            <Route path="apis/:listId" element={<ListContaiter />} />
+            <Route
+              path="apis/:listId"
+              element={state ? <ListContaiter /> : <Navigate replace to="/" />}
+            />
 
             {/* Omdb */}
-            <Route path="integrations/Omdb" element={<OmdbContainer />} />
+            <Route
+              path="integrations/Omdb"
+              element={state ? <OmdbContainer /> : <Navigate replace to="/" />}
+            />
             <Route
               path="integrations/Omdb/apiImport"
-              element={<OmdbDataApiContainer />}
+              element={
+                state ? <OmdbDataApiContainer /> : <Navigate replace to="/" />
+              }
             />
             {/* Omdb */}
 
             {/* Stockdata */}
             <Route
               path="integrations/Alphavantage"
-              element={<StockDataContainer />}
+              element={
+                state ? <StockDataContainer /> : <Navigate replace to="/" />
+              }
             />
             <Route
               path="integrations/Alphavantage/apiImport"
-              element={<StockDataApiContainer />}
+              element={
+                state ? <StockDataApiContainer /> : <Navigate replace to="/" />
+              }
             />
             {/* Stockdata */}
 
             {/* Unsplash */}
             <Route
               path="integrations/Unsplash"
-              element={<UnsplashContainer />}
+              element={
+                state ? <UnsplashContainer /> : <Navigate replace to="/" />
+              }
             />
             <Route
               path="integrations/Unsplash/apiImport"
-              element={<UnsplashDataApiContainer />}
+              element={
+                state ? (
+                  <UnsplashDataApiContainer />
+                ) : (
+                  <Navigate replace to="/" />
+                )
+              }
             />
             {/* Unsplash */}
 
             {/* Calendarific */}
             <Route
               path="integrations/Calendarific"
-              element={<CalendarificContainer />}
+              element={
+                state ? <CalendarificContainer /> : <Navigate replace to="/" />
+              }
             />
 
             {/* Calendarific */}
             {/* Googlejobs */}
             <Route
               path="integrations/Googlejobs"
-              element={<GoogleJobsContainer />}
+              element={
+                state ? <GoogleJobsContainer /> : <Navigate replace to="/" />
+              }
             />
 
             {/* Googlejobs */}
             {/* Googlekeyword */}
             <Route
               path="integrations/Googlekeyword"
-              element={<GoogleKeywordContainer />}
+              element={
+                state ? <GoogleKeywordContainer /> : <Navigate replace to="/" />
+              }
             />
 
             {/* Googlekeyword */}
             {/* Hunter */}
-            <Route path="integrations/Hunter" element={<HunterContainer />} />
+            <Route
+              path="integrations/Hunter"
+              element={
+                state ? <HunterContainer /> : <Navigate replace to="/" />
+              }
+            />
 
             {/* Hunter */}
 
             {/* TheNewsApi */}
             <Route
               path="integrations/Thenewsapi"
-              element={<TheNewsApiContainer />}
+              element={
+                state ? <TheNewsApiContainer /> : <Navigate replace to="/" />
+              }
             />
 
             {/* TheNewsApi */}
@@ -132,44 +218,116 @@ const App = () => {
             {/* Googlebooks */}
             <Route
               path="integrations/Googlebooks"
-              element={<GooglebooksContainer />}
+              element={
+                state ? <GooglebooksContainer /> : <Navigate replace to="/" />
+              }
             />
             <Route
               path="integrations/Googlebooks/apiImport"
-              element={<GooglebooksDataApiContainer />}
+              element={
+                state ? (
+                  <GooglebooksDataApiContainer />
+                ) : (
+                  <Navigate replace to="/" />
+                )
+              }
             />
             {/* Googlebooks */}
 
             {/* Spoonacular */}
             <Route
               path="integrations/Spoonacular"
-              element={<SpoonacularContainer />}
+              element={
+                state ? <SpoonacularContainer /> : <Navigate replace to="/" />
+              }
             />
             <Route
               path="integrations/Spoonacular/apiImport"
-              element={<SpoonacularDataApiContainer />}
+              element={
+                state ? (
+                  <SpoonacularDataApiContainer />
+                ) : (
+                  <Navigate replace to="/" />
+                )
+              }
             />
             {/* Spoonacular */}
             {/* CaloriesBurned */}
             <Route
               path="integrations/Caloriesburned"
-              element={<CaloriesBurnedContainer />}
+              element={
+                state ? (
+                  <CaloriesBurnedContainer />
+                ) : (
+                  <Navigate replace to="/" />
+                )
+              }
             />
             <Route
               path="integrations/Caloriesburned/apiImport"
-              element={<CaloriesBurnedDataApiContainer />}
+              element={
+                state ? (
+                  <CaloriesBurnedDataApiContainer />
+                ) : (
+                  <Navigate replace to="/" />
+                )
+              }
             />
             {/* CaloriesBurned */}
             {/* Bigpicture */}
             <Route
               path="integrations/Bigpicture"
-              element={<BigPictureContainer />}
+              element={
+                state ? <BigPictureContainer /> : <Navigate replace to="/" />
+              }
             />
             <Route
               path="integrations/Bigpicture/apiImport"
-              element={<BigPictureDataApiContainer />}
+              element={
+                state ? (
+                  <BigPictureDataApiContainer />
+                ) : (
+                  <Navigate replace to="/" />
+                )
+              }
             />
             {/* Bigpicture */}
+            {/* Coinranking */}
+            <Route
+              path="integrations/Coinranking"
+              element={
+                state ? <CoinRankingContainer /> : <Navigate replace to="/" />
+              }
+            />
+            <Route
+              path="integrations/Coinranking/apiImport"
+              element={
+                state ? (
+                  <CoinRankingApiContainer />
+                ) : (
+                  <Navigate replace to="/" />
+                )
+              }
+            />
+            {/* Coinranking */}
+            {/* Triposo */}
+            <Route
+              path="integrations/Triposo"
+              element={
+                state ? <TriposoContainer /> : <Navigate replace to="/" />
+              }
+            />
+            <Route
+              path="integrations/Triposo/apiImport"
+              element={
+                state ? (
+                  <TriposoDataApiContainer />
+                ) : (
+                  <Navigate replace to="/" />
+                )
+              }
+            />
+            {/* Triposo */}
           </Route>
         </Route>
       </Route>

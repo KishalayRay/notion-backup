@@ -26,7 +26,7 @@ const recipesReducer = (state, action) => {
       };
     case "CREATE_RECIPE_SUCCESS":
       return {
-        recipes: [...state.recipes, action.payload],
+        recipes: [action.payload, ...state.recipes],
         isFetching: false,
         error: false,
       };

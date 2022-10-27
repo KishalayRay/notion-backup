@@ -7,7 +7,7 @@ const User = require("../../models/User");
 const _ = require("lodash");
 const { createError } = require("../../utils/error");
 const {
-  registerEmailParams,   
+  registerEmailParams,
   forgotPasswordParams,
 } = require("../../helpers/email");
 
@@ -125,7 +125,7 @@ exports.userLogin = async (req, res, next) => {
       },
       process.env.JWT_ACCESSTOKEN_SECRET_KEY,
       {
-        expiresIn: "5m",
+        expiresIn: "30m",
       }
     );
     const refreshToken = jwt.sign(
@@ -174,7 +174,7 @@ exports.refreshToken = async (req, res, next) => {
         },
         process.env.JWT_ACCESSTOKEN_SECRET_KEY,
         {
-          expiresIn: "5m",
+          expiresIn: "30m",
         }
       );
       res.status(200).json({

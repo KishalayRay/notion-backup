@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { Spinner, Center } from "@chakra-ui/react";
-
+import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import useAuth from "../../hooks/useAuth";
@@ -21,89 +21,106 @@ import {
 const List = () => {
   const { auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
-  const [proList, setProList] = useState([]);
-  const [lists, setLists] = useState([]);
+  //const [proList, setProList] = useState([]);
+  //const [lists, setLists] = useState([]);
   const fetchProList = async () => {
     const response = await axiosPrivate.get(`/apilist/pro`);
-    setProList(response.data.data.api);
-    console.log(response.data.data.api);
+    console.log(response.data);
+    return response.data.data.api;
+    // setProList(response.data.data.api);
+    // console.log(response.data.data.api);
   };
 
   const fetchList = async () => {
     const response = await axiosPrivate.get(`/apilist/`);
-    setLists(response.data.data.api);
-    console.log(response.data.data.api);
+    return response.data.data.api;
+    // setLists(response.data.data.api);
+    // console.log(response.data.data.api);
   };
 
-  useEffect(() => {
-    fetchProList();
-    fetchList();
-  }, []);
+  // useEffect(() => {
+  //   fetchProList();
+  //   fetchList();
+  // }, []);
+
+  const {
+    isLoading: isLoadingPro,
+    isError: isErrorPro,
+    error: errorPro,
+    data: proList,
+  } = useQuery("proList", fetchProList);
+  const {
+    isLoading: isLoadingList,
+    isError: isErrorList,
+    error: errorList,
+    data: lists,
+  } = useQuery("lists", fetchList);
+  console.log(lists);
+  if (isLoadingPro || isLoadingList) {
+    return (
+      <Center>
+        <Spinner mt={16} color="purple.500" size="xl" />
+      </Center>
+    );
+  }
+  if (isErrorPro || isErrorList) return <div>Error</div>;
   const listLength = lists.length;
   console.log(listLength);
   return (
     <>
-      {!listLength ? (
-        <Center>
-          <Spinner mt={16} color="purple.500" size="xl" />
-        </Center>
+      {listLength === 1 ? (
+        <Box as="section" py={{ base: "6", md: "8" }}>
+          <Container>
+            <SimpleGrid
+              columns={{ base: 1, md: 3 }}
+              gap={{ base: "5", md: "6" }}
+            >
+              {lists.map((list) => {
+                return (
+                  <Link to={`/apis/${list.apiSlug}`} state={list}>
+                    <StatsCard
+                      title={list.apiName}
+                      stat={list.description}
+                      image={list.logo}
+                      isPro={false}
+                    />
+                  </Link>
+                );
+              })}
+              {proList.map((list) => {
+                return (
+                  <StatsCard
+                    title={list.apiName}
+                    stat={list.description}
+                    image={list.logo}
+                    isPro={true}
+                  />
+                );
+              })}
+            </SimpleGrid>
+          </Container>
+        </Box>
       ) : (
-        <>
-          {listLength === 1 ? (
-            <Box as="section" py={{ base: "6", md: "8" }}>
-              <Container>
-                <SimpleGrid
-                  columns={{ base: 1, md: 3 }}
-                  gap={{ base: "5", md: "6" }}
-                >
-                  {lists.map((list) => {
-                    return (
-                      <Link to={`/apis/${list.apiSlug}`} state={list}>
-                        <StatsCard
-                          title={list.apiName}
-                          stat={list.description}
-                          image={list.logo}
-                          isPro={false}
-                        />
-                      </Link>
-                    );
-                  })}
-                  {proList.map((list) => {
-                    return (
-                      <StatsCard
-                        title={list.apiName}
-                        stat={list.description}
-                        image={list.logo}
-                        isPro={true}
-                      />
-                    );
-                  })}
-                </SimpleGrid>
-              </Container>
-            </Box>
-          ) : (
-            <Box as="section" py={{ base: "6", md: "8" }}>
-              <Container>
-                <SimpleGrid
-                  columns={{ base: 1, md: 3 }}
-                  gap={{ base: "5", md: "6" }}
-                >
-                  {lists.map((list) => {
-                    return (
-                      <Link to={`/apis/${list.apiSlug}`} state={list}>
-                        <StatsCard
-                          title={list.apiName}
-                          stat={list.description}
-                          image={list.logo}
-                        />
-                      </Link>
-                    );
-                  })}
-                </SimpleGrid>
-              </Container>
-            </Box>
-          )}
-        </>
+        <Box as="section" py={{ base: "6", md: "8" }}>
+          <Container>
+            <SimpleGrid
+              columns={{ base: 1, md: 3 }}
+              gap={{ base: "5", md: "6" }}
+            >
+              {lists.map((list) => {
+                return (
+                  <Link to={`/apis/${list.apiSlug}`} state={list}>
+                    <StatsCard
+                      title={list.apiName}
+                      stat={list.description}
+                      image={list.logo}
+                    />
+                  </Link>
+                );
+              })}
+            </SimpleGrid>
+          </Container>
+        </Box>
       )}
     </>
   );
