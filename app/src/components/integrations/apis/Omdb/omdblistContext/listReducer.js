@@ -4,7 +4,7 @@ const OmdbReducer = (state, action) => {
       return {
         ...state,
         isFetching: true,
-        error: false,
+        error: "",
       };
     case "GET_MOVIES_SUCCESS":
       return {
@@ -12,40 +12,40 @@ const OmdbReducer = (state, action) => {
         omdb: action.payload.omdb,
         pageCount: action.payload.pageCount,
         isFetching: false,
-        error: false,
+        error: "",
       };
     case "GET_MOVIES_FAILURE":
       return {
         ...state,
         omdb: [],
         isFetching: false,
-        error: true,
+        error: "",
       };
     case "CREATE_MOVIES_START":
       return {
         ...state,
         isFetching: true,
-        error: false,
+        error: "",
       };
     case "CREATE_MOVIES_SUCCESS":
       return {
         ...state,
         omdb: [action.payload, ...state.omdb],
         isFetching: false,
-        error: false,
+        error: "",
       };
     case "CREATE_MOVIES_FAILURE":
       return {
         ...state,
         isFetching: false,
-        error: true,
+        error: action.payload,
       };
 
     case "DELETE_MOVIES_START":
       return {
         ...state,
         isFetching: true,
-        error: false,
+        error: "",
       };
     case "DELETE_MOVIES_SUCCESS":
       return {
@@ -54,13 +54,13 @@ const OmdbReducer = (state, action) => {
           return movie._id !== action.payload;
         }),
         isFetching: false,
-        error: false,
+        error: "",
       };
     case "DELETE_MOVIES_FAILURE":
       return {
         ...state,
         isFetching: false,
-        error: true,
+        error: "",
       };
     case "NEXT_PAGE":
       // let page = state.pageId + 1;

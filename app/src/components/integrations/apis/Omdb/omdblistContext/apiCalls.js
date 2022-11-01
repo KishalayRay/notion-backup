@@ -42,61 +42,29 @@ export const CreateMovie = async (movieId, axiosPrivate, dispatch) => {
       movieTitle: movie.Title,
       movieImage: movie.Poster,
       movieGenre: movie.Genre.split(",")[0],
-      movieDuration: parseFloat(movie.Runtime) || 0,
-      movieRating: parseFloat(movie.imdbRating) || 0,
-      movieYear: parseFloat(movie.Year) || 0,
+      movieDuration: parseFloat(movie.Runtime),
+      movieRating: parseFloat(movie.imdbRating),
+      movieYear: parseFloat(movie.Year),
     };
 
     const postData = await axiosPrivate.post(`/omdb/newomdb`, {
       movieId: movie.imdbID,
       movieTitle: movie.Title,
       movieImage: movie.Poster,
-      movieGenre: movie.Genre.split(",")[0],
-      movieDuration: parseFloat(movie.Runtime) || 0,
-      movieRating: parseFloat(movie.imdbRating) || 0,
-      movieYear: parseFloat(movie.Year) || 0,
+      movieGenre: movie.Genre.split(","),
+      movieDuration: parseFloat(movie.Runtime),
+      movieRating: parseFloat(movie.imdbRating),
+      movieYear: parseFloat(movie.Year),
     });
     console.log(postData.data);
     console.log(movieObject);
     dispatch(createOmdbSuccess(movieObject));
   } catch (e) {
     console.log(e);
-    dispatch(createOmdbFailure);
+    dispatch(createOmdbFailure(e.response.data.message));
   }
 };
-// const response = await axios.get(`${API}&i=${movieId}`);
-//   const movie = response.data;
-//   console.log(movie);
-//   const movieObject = {
-//     movieId: movie.imdbID,
-//     movieTitle: movie.Title,
-//     movieImage: movie.Poster,
-//     movieGenre: movie.Genre,
-//     movieDuration: movie.Runtime,
-//     movieRating: movie.imdbRating,
-//     movieYear: movie.Year,
-//   };
 
-// axios.post(
-//   `/omdb/newomdb`,
-//   {
-//     movieId: movie.imdbID,
-//     movieTitle: movie.Title,
-//     movieImage: movie.Poster,
-//     movieGenre: movie.Genre,
-//     movieDuration: movie.Runtime,
-//     movieRating: movie.imdbRating,
-//     movieYear: movie.Year,
-//   },
-//   {
-//     headers: {
-//       token: `Bearer ${
-//         JSON.parse(localStorage.getItem("user")).accessToken
-//       }`,
-//     },
-//   }
-// );
-// console.log("success post");
 export const DeleteMovie = async (id, axiosPrivate, dispatch) => {
   dispatch(deleteOmdbStart);
 

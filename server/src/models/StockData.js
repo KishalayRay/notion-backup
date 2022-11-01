@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const stockDataSchema = new mongoose.Schema(
   {
+    stockName: {
+      type: String,
+      required: true,
+    },
     stockSymbol: {
       type: String,
       required: true,

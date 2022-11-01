@@ -5,8 +5,13 @@ const { Client } = require("@notionhq/client");
 const { createError } = require("../../utils/error");
 exports.createActivity = async (req, res, next) => {
   try {
+    const currDate = new Date().toISOString();
     const activity = await Calories.findOne({
-      $and: [{ name: req.body.name }, { users: req.user.id }],
+      $and: [
+        { name: req.body.name },
+        { date: currDate },
+        { users: req.user.id },
+      ],
     });
     console.log(activity);
     if (activity) {
@@ -16,54 +21,25 @@ exports.createActivity = async (req, res, next) => {
       $set: {
         name: req.body.name,
         duration: req.body.duration,
+        date: currDate,
         cph: req.body.cph,
         burned: req.body.burned,
       },
       $push: { users: req.user.id },
     };
 
-    const activityUpdate = await Calories.updateOne(
-      { name: req.body.name },
-      update,
-      {
-        upsert: true,
-      }
-    );
-
-    // notion update
-
-    const notionCredential = await NotionApiKey.findOne(
-      {
-        $and: [
-          { user: req.user.id },
-          { credentials: { $elemMatch: { apiSlug: "Caloriesburned" } } },
-        ],
-      },
-      { credentials: { $elemMatch: { apiSlug: "Caloriesburned" } } }
-    );
-    console.log(notionCredential);
-    const dataBaseId = notionCredential.credentials[0].databaseId;
-    const notionKey = notionCredential.credentials[0].apiKey;
-    console.log(dataBaseId, notionKey);
+    await Calories.updateOne({ name: req.body.name }, update, {
+      upsert: true,
+    });
 
     const notion = new Client({
-      auth: notionKey,
+      auth: req.notionKey,
     });
-    const retrieveDatabase = async () => {
-      const response = await notion.databases.retrieve({
-        database_id: dataBaseId,
-      });
-
-      if (response === null) {
-        return next(createError(400, "Notion Database not found"));
-      }
-    };
-    retrieveDatabase();
 
     const main = async () => {
       const response = await notion.pages.create({
         parent: {
-          database_id: dataBaseId,
+          database_id: req.dataBaseId,
         },
         properties: {
           Activity: {
@@ -84,6 +60,11 @@ exports.createActivity = async (req, res, next) => {
           },
           Burned: {
             number: req.body.burned,
+          },
+          Date: {
+            date: {
+              start: currDate,
+            },
           },
         },
       });

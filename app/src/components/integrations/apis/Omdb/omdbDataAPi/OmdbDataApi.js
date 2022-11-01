@@ -12,6 +12,7 @@ import {
   InputRightElement,
   Input,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
@@ -23,9 +24,10 @@ import { CreateMovie } from "../omdblistContext/apiCalls";
 import useAxiosPrivate from "../../../../../hooks/useAxiosPrivate";
 const Omdb = () => {
   const axiosPrivate = useAxiosPrivate();
+
   const { query, searchMovie, movies, addMovie, getApiKey, isLoading } =
     useContext(OmdbContext);
-  const { dispatch } = useContext(OmdblistContext);
+  const { dispatch, error } = useContext(OmdblistContext);
   const [queryM, setQueryM] = useState("");
   const handleSearch = (e) => {
     e.preventDefault();
@@ -34,6 +36,7 @@ const Omdb = () => {
   useEffect(() => {
     getApiKey(axiosPrivate);
   }, [query]);
+
   return (
     <Stack>
       <Center py={6}>

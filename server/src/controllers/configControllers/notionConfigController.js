@@ -139,7 +139,7 @@ exports.deleteNotionConfig = async (req, res, next) => {
       );
       await NotionCalendarificPage.deleteOne({ user: req.user.id });
     } else if (req.body.apiSlug === "Thenewsapi") {
-      await TheNewsAPi.updateMany(
+      await TheNewsApi.updateMany(
         { users: req.user.id },
         { $pull: { users: req.user.id } }
       );

@@ -95,7 +95,7 @@ const StockData = () => {
                 {stockData.map((stock) => {
                   return (
                     <Tr>
-                      <Td>{stock.stockSymbol}</Td>
+                      <Td>{stock.stockName}</Td>
                       <Td>{stock.stockPrice}</Td>
                       <Td>{stock.stockDayChangeParcentage}%</Td>
                       <Td>{stock.stockDayHigh}</Td>

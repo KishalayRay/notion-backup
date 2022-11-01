@@ -17,6 +17,10 @@ const caloriesBurnedSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    date: {
+      type: String,
+      required: true,
+    },
     users: [
       {
         type: mongoose.SchemaTypes.ObjectId,

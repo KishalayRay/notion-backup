@@ -134,6 +134,7 @@ const StockData = () => {
                         onClick={() => {
                           CreateStock(
                             stock["1. symbol"],
+                            stock["2. name"],
                             axiosPrivate,
                             dispatch
                           );

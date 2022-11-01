@@ -7,6 +7,7 @@ const axios = require("axios");
 const NotionCalendarificPage = require("../../models/NotionCalendarificPage");
 const { Client } = require("@notionhq/client");
 const { createError } = require("../../utils/error");
+
 exports.createCountry = async (req, res, next) => {
   try {
     const existCalendar = await Calendarific.findOne({
@@ -43,68 +44,41 @@ exports.createCountry = async (req, res, next) => {
 };
 exports.createHoliday = async (req, res, next) => {
   try {
-    const holidayBody = {
-      name: req.body.name,
-      description: req.body.description,
-      date: new Date(req.body.date),
-    };
-    const update = {
-      $set: {
-        country: req.body.country,
-        month: req.body.month,
-        year: req.body.year,
-      },
-      $push: { holidays: holidayBody },
-    };
-    await await CalendarificList.updateOne(
-      {
-        country: req.body.country,
-      },
-      update,
-      {
+    const response = await axios.get(
+      `https://calendarific.com/api/v2/holidays?country=${req.body.country}&year=${req.body.year}&api_key=${req.body.apiKey}&month=${req.body.month}`
+    );
+    const holidays = response.data.response.holidays;
+    console.log(holidays);
+    holidays.map(async (holiday) => {
+      const holidayBody = {
+        name: holiday.name,
+        description: holiday.description,
+        date: holiday.date.iso.substring(0, 10),
+      };
+      const update = {
+        $set: {
+          country: req.body.country,
+          month: req.body.month,
+          year: req.body.year,
+        },
+        $push: { holidays: holidayBody },
+      };
+      await CalendarificList.updateOne({ country: req.body.country }, update, {
         upsert: true,
-      }
-    );
-    const notionCredential = await NotionApiKey.findOne(
-      {
-        $and: [
-          { user: req.user.id },
-          { credentials: { $elemMatch: { apiSlug: "Calendarific" } } },
-        ],
-      },
-      { credentials: { $elemMatch: { apiSlug: "Calendarific" } } }
-    );
-    console.log(notionCredential);
-    const dataBaseId = notionCredential.credentials[0].databaseId;
-
-    const notionKey = notionCredential.credentials[0].apiKey;
-
-    console.log(dataBaseId, notionKey);
-
-    const notion = new Client({
-      auth: notionKey,
-    });
-    const retrieveDatabase = async () => {
-      const response = await notion.databases.retrieve({
-        database_id: dataBaseId,
       });
-      if (response === null) {
-        return next(createError(400, "Notion Database not found"));
-      }
-    };
-    retrieveDatabase();
-
-    const main = async () => {
+      const notion = new Client({
+        auth: req.notionKey,
+      });
       const response = await notion.pages.create({
         parent: {
-          database_id: dataBaseId,
+          database_id: req.dataBaseId,
         },
         properties: {
           Name: {
             title: [
               {
                 text: {
-                  content: req.body.name,
+                  content: holiday.name,
                 },
               },
             ],
@@ -114,37 +88,37 @@ exports.createHoliday = async (req, res, next) => {
             rich_text: [
               {
                 text: {
-                  content: req.body.description,
+                  content: holiday.description,
                 },
               },
             ],
           },
           Date: {
             date: {
-              start: req.body.date,
+              start: holiday.date.iso.substring(0, 10),
             },
           },
         },
       });
+
       const body = {
-        name: req.body.name,
+        name: holiday.name,
         pageId: response.id,
       };
-      const update = {
+      const updatePage = {
         $set: { user: req.user.id },
         $push: { associateIds: body },
       };
       const createPage = await NotionCalendarificPage.updateOne(
         { user: req.user.id },
-        update,
+        updatePage,
         {
           upsert: true,
         }
       );
       console.log(createPage);
-    };
+    });
 
-    main();
     res.status(200).json({
       data: {
         message: "Data Inserted to mongodb",

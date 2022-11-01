@@ -1,6 +1,8 @@
 const cryptoJS = require("crypto-js");
-const NotionApiKey = require("../models/NotionKey");
+const NotionApiKey = require("../../models/NotionKey");
+const axios = require("axios");
 const { Client } = require("@notionhq/client");
+const { createError } = require("../../utils/error");
 const omdbMiddleware = async (req, res, next) => {
   const notionCredential = await NotionApiKey.findOne(
     {
@@ -26,16 +28,26 @@ const omdbMiddleware = async (req, res, next) => {
     if (response === null) {
       return;
     }
+    console.log(response.properties);
     const arrayOne = Object.values(response.properties).map(
-      (item) => item.name
+      (item) => `${item.name},${item.type}`
     );
-    console.log(arrayOne);
-    arrayTwo = ["Image", "Rating", "Genre", "Year", "Duration (min)", "Title"];
-    const result = arrayTwo.every((val) => arrayOne.includes(val));
 
+    console.log(arrayOne);
+    arrayTwo = [
+      "Image,files",
+      "Rating,number",
+      "Genre,multi_select",
+      "Year,number",
+      "Duration (min),number",
+      "Title,title",
+    ];
+    const result = arrayTwo.every((val) => arrayOne.includes(val));
+    console.log(result);
     if (result === false) {
-      return;
+      return next(createError(400, "You have updated notion database"));
     }
+
     req.dataBaseId = dataBaseId;
     req.notionKey = notionKey;
     next();

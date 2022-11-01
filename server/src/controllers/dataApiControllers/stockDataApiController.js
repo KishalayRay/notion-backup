@@ -1,5 +1,4 @@
 const StockData = require("../../models/StockData");
-const cryptoJS = require("crypto-js");
 const NotionApiKey = require("../../models/NotionKey");
 const Apikey = require("../../models/ApiKey");
 const NotionStockDataPage = require("../../models/NotionStockDataPage");
@@ -18,12 +17,15 @@ exports.createStock = async (req, res, next) => {
     }
     const update = {
       $set: {
+        stockName: req.body.stockName,
         stockSymbol: req.body.stockSymbol,
-        stockPrice: parseFloat(req.body.stockPrice),
-        stockDayChange: parseFloat(req.body.stockDayChange),
-        stockDayChangeParcentage: parseFloat(req.body.stockDayChangeParcentage),
-        stockDayHigh: parseFloat(req.body.stockDayHigh),
-        stockDayLow: parseFloat(req.body.stockDayLow),
+        stockPrice: parseFloat(req.body.stockPrice).toFixed(2),
+        stockDayChange: parseFloat(req.body.stockDayChange).toFixed(2),
+        stockDayChangeParcentage: parseFloat(
+          req.body.stockDayChangeParcentage
+        ).toFixed(2),
+        stockDayHigh: parseFloat(req.body.stockDayHigh).toFixed(2),
+        stockDayLow: parseFloat(req.body.stockDayLow).toFixed(2),
       },
       $push: { users: req.user.id },
     };
@@ -33,41 +35,28 @@ exports.createStock = async (req, res, next) => {
     });
     // notion update
 
-    const notionCredential = await NotionApiKey.findOne(
-      {
-        $and: [
-          { user: req.user.id },
-          { credentials: { $elemMatch: { apiSlug: "Alphavantage" } } },
-        ],
-      },
-      { credentials: { $elemMatch: { apiSlug: "Alphavantage" } } }
-    );
-    console.log(notionCredential);
-    const dataBaseId = notionCredential.credentials[0].databaseId;
-    const notionKey = notionCredential.credentials[0].apiKey;
-    console.log(dataBaseId, notionKey);
-
     const notion = new Client({
-      auth: notionKey,
+      auth: req.notionKey,
     });
-    const retrieveDatabase = async () => {
-      const response = await notion.databases.retrieve({
-        database_id: dataBaseId,
-      });
-      if (response === null) {
-        return next(createError(400, "Notion Database not found"));
-      }
-    };
-    retrieveDatabase();
 
     const main = async () => {
       const response = await notion.pages.create({
         parent: {
-          database_id: dataBaseId,
+          database_id: req.dataBaseId,
         },
         properties: {
           Stock: {
             title: [
+              {
+                type: "text",
+                text: {
+                  content: req.body.stockName,
+                },
+              },
+            ],
+          },
+          Symbol: {
+            rich_text: [
               {
                 type: "text",
                 text: {
@@ -79,16 +68,16 @@ exports.createStock = async (req, res, next) => {
           Price: {
             number: parseFloat(req.body.stockPrice),
           },
-          Day_Change: {
+          "Day Change": {
             number: parseFloat(req.body.stockDayChange),
           },
-          Change_Parcentage: {
-            number: parseFloat(req.body.stockDayChangeParcentage) / 100.0,
+          "Change Parcentage": {
+            number: parseFloat(req.body.stockDayChangeParcentage) / 100,
           },
-          Todays_High: {
+          "Todays High": {
             number: parseFloat(req.body.stockDayHigh),
           },
-          Todays_Low: {
+          "Todays Low": {
             number: parseFloat(req.body.stockDayLow),
           },
         },

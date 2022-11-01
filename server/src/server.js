@@ -53,8 +53,9 @@ const connectDB = async () => {
 };
 connectDB();
 
-app.use(morgan("dev"));
+app.use(morgan("tiny"));
 app.use(express.json());
+
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1/auth", authRoute);

@@ -17,6 +17,7 @@ import {
   Th,
   Tbody,
   Td,
+  useToast,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import useAxiosPrivate from "../../../../hooks/useAxiosPrivate";
@@ -26,11 +27,12 @@ import { OmdblistContext } from "./omdblistContext/listContext";
 
 import { GetMovies, DeleteMovie } from "./omdblistContext/apiCalls";
 const Omdb = () => {
+  const toast = useToast();
   const [load, setLoad] = useState(false);
   const axiosPrivate = useAxiosPrivate();
-  const { dispatch, omdb, pageId, nextPage, prevPage, pageCount } =
+  const { dispatch, omdb, pageId, nextPage, prevPage, pageCount, error } =
     useContext(OmdblistContext);
-
+  console.log(error, "error");
   useEffect(() => {
     GetMovies(axiosPrivate, dispatch, pageId);
     console.log(dispatch);
@@ -44,6 +46,13 @@ const Omdb = () => {
 
   return (
     <Stack>
+      {error &&
+        toast({
+          title: error,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        })}
       <Center py={6}>
         <Box
           maxW={"800px"}
@@ -78,7 +87,7 @@ const Omdb = () => {
       <Center py={6}>
         <Box
           maxW={"800px"}
-          height={"640px"}
+          height={"680px"}
           w={"full"}
           bg={useColorModeValue("white", "gray.900")}
           boxShadow={"2xl"}
@@ -134,7 +143,7 @@ const Omdb = () => {
                       </Td>
                       <Td>
                         {/* <Badge variant="subtle">{movie.movieGenre}</Badge> */}
-                        {movie.movieGenre}
+                        {movie.movieGenre[0]}
                       </Td>
                       <Td>{movie.movieYear}</Td>
                       <Td>{movie.movieRating}</Td>

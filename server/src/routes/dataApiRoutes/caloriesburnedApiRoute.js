@@ -6,8 +6,8 @@ const {
   getActivities,
   deleteActivity,
 } = require("../../controllers/dataApiControllers/caloriesBurnedApiController");
-
-router.post("/newActivity", verify, createActivity);
+const caloriesBurnedMiddleware = require("../../middlewares/dataApiMiddlewares/caloriesBurnedMiddleware");
+router.post("/newActivity", verify, caloriesBurnedMiddleware, createActivity);
 router.get("/activities", verify, getActivities);
 router.put("/:id", verify, deleteActivity);
 module.exports = router;

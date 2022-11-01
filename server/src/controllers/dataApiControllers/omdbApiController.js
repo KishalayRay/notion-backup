@@ -19,9 +19,9 @@ exports.createOmdb = async (req, res, next) => {
         movieTitle: req.body.movieTitle,
         movieImage: req.body.movieImage,
         movieGenre: req.body.movieGenre,
-        movieDuration: req.body.movieDuration,
-        movieRating: req.body.movieRating,
-        movieYear: req.body.movieYear,
+        movieDuration: req.body.movieDuration || 0,
+        movieRating: req.body.movieRating || 0,
+        movieYear: req.body.movieYear || 0,
       },
       $push: { users: req.user.id },
     };
@@ -29,33 +29,10 @@ exports.createOmdb = async (req, res, next) => {
     await Omdb.updateOne({ movieId: req.body.movieId }, update, {
       upsert: true,
     });
-    // notion update
-
-    // const notionCredential = await NotionApiKey.findOne(
-    //   {
-    //     $and: [
-    //       { user: req.user.id },
-    //       { credentials: { $elemMatch: { apiSlug: "Omdb" } } },
-    //     ],
-    //   },
-    //   { credentials: { $elemMatch: { apiSlug: "Omdb" } } }
-    // );
-    // console.log(notionCredential);
-    // const dataBaseId = notionCredential.credentials[0].databaseId;
-
-    // const notionKey = notionCredential.credentials[0].apiKey;
-
-    // console.log(dataBaseId, notionKey);
 
     const notion = new Client({
       auth: req.notionKey,
     });
-    // const retrieveDatabase = async () => {
-    //   const response = await notion.databases.retrieve({
-    //     database_id: dataBaseId,
-    //   });
-    // };
-    // retrieveDatabase();
 
     const main = async () => {
       try {
@@ -85,20 +62,20 @@ exports.createOmdb = async (req, res, next) => {
               ],
             },
             Genre: {
-              multi_select: [
-                {
-                  name: req.body.movieGenre.split(",")[0],
-                },
-              ],
+              multi_select: req.body.movieGenre.map((genre) => {
+                return {
+                  name: genre,
+                };
+              }),
             },
             "Duration (min)": {
-              number: parseFloat(req.body.movieDuration) || 0,
+              number: req.body.movieDuration || 0,
             },
             Rating: {
-              number: parseFloat(req.body.movieRating) || 0,
+              number: req.body.movieRating || 0,
             },
             Year: {
-              number: parseFloat(req.body.movieYear) || 0,
+              number: req.body.movieYear || 0,
             },
           },
         });

@@ -5,7 +5,7 @@ const INITIAL_STATE = {
   pageId: 1,
   pageCount: 0,
   isFetching: false,
-  error: false,
+  error: "",
 };
 export const OmdblistContext = createContext(INITIAL_STATE);
 

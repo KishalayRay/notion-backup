@@ -24,7 +24,12 @@ export const GetStocks = async (axiosPrivate, dispatch) => {
     dispatch(getStockFailure);
   }
 };
-export const CreateStock = async (stockSymbol, axiosPrivate, dispatch) => {
+export const CreateStock = async (
+  stockSymbol,
+  stockName,
+  axiosPrivate,
+  dispatch
+) => {
   dispatch(createStockStart);
   console.log(stockSymbol);
   try {
@@ -41,21 +46,27 @@ export const CreateStock = async (stockSymbol, axiosPrivate, dispatch) => {
     const stock = response.data["Global Quote"];
     console.log(stock);
     const stockObject = {
+      stockName: stockName,
       stockSymbol: stock["01. symbol"],
-      stockPrice: stock["05. price"],
-      stockDayChange: stock["09. change"],
-      stockDayChangeParcentage: stock["10. change percent"],
-      stockDayHigh: stock["03. high"],
-      stockDayLow: stock["04. low"],
+      stockPrice: parseFloat(stock["05. price"]).toFixed(2),
+      stockDayChange: parseFloat(stock["09. change"]).toFixed(2),
+      stockDayChangeParcentage: parseFloat(stock["10. change percent"]).toFixed(
+        2
+      ),
+      stockDayHigh: parseFloat(stock["03. high"]).toFixed(2),
+      stockDayLow: parseFloat(stock["04. low"]).toFixed(2),
     };
 
     const postData = await axiosPrivate.post(`/stockdata/newstock`, {
+      stockName: stockName,
       stockSymbol: stock["01. symbol"],
-      stockPrice: stock["05. price"],
-      stockDayChange: stock["09. change"],
-      stockDayChangeParcentage: stock["10. change percent"],
-      stockDayHigh: stock["03. high"],
-      stockDayLow: stock["04. low"],
+      stockPrice: parseFloat(stock["05. price"]).toFixed(2),
+      stockDayChange: parseFloat(stock["09. change"]).toFixed(2),
+      stockDayChangeParcentage: parseFloat(stock["10. change percent"]).toFixed(
+        2
+      ),
+      stockDayHigh: parseFloat(stock["03. high"]).toFixed(2),
+      stockDayLow: parseFloat(stock["04. low"]).toFixed(2),
     });
     console.log(postData.data);
     console.log(stockObject);

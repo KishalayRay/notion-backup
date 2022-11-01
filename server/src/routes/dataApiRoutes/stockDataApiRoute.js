@@ -8,8 +8,9 @@ const {
   updateStock,
   pageDetails,
 } = require("../../controllers/dataApiControllers/stockDataApiController");
+const stockDataMiddleware = require("../../middlewares/dataApiMiddlewares/stockDataMiddleware");
 
-router.post("/newstock", verify, createStock);
+router.post("/newstock", verify, stockDataMiddleware, createStock);
 router.get("/stocks", verify, getStocks);
 router.put("/:id", verify, deleteStock);
 router.get("/", updateStock);

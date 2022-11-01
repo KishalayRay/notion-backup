@@ -8,7 +8,6 @@ const {
   deleteApiConfig,
 } = require("../../controllers/configControllers/apiConfigController");
 
-const apiKeyMiddleware = require("../../middlewares/apiKeyMiddleware/apiKey");
 router.post(
   "/newkey",
   body("key").not().isEmpty().withMessage("API required required"),

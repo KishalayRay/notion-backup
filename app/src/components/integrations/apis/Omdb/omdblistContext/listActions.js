@@ -17,8 +17,9 @@ export const createOmdbSuccess = (movie) => ({
   type: "CREATE_MOVIES_SUCCESS",
   payload: movie,
 });
-export const createOmdbFailure = () => ({
+export const createOmdbFailure = (error) => ({
   type: "CREATE_MOVIES_FAILURE",
+  payload: error,
 });
 
 export const deleteOmdbStart = () => ({
