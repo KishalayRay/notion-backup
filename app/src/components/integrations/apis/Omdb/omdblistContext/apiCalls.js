@@ -47,15 +47,18 @@ export const CreateMovie = async (movieId, axiosPrivate, dispatch) => {
       movieYear: parseFloat(movie.Year),
     };
 
-    const postData = await axiosPrivate.post(`/omdb/newomdb`, {
-      movieId: movie.imdbID,
-      movieTitle: movie.Title,
-      movieImage: movie.Poster,
-      movieGenre: movie.Genre.split(","),
-      movieDuration: parseFloat(movie.Runtime),
-      movieRating: parseFloat(movie.imdbRating),
-      movieYear: parseFloat(movie.Year),
-    });
+    const postData = setTimeout(
+      await axiosPrivate.post(`/omdb/newomdb`, {
+        movieId: movie.imdbID,
+        movieTitle: movie.Title,
+        movieImage: movie.Poster,
+        movieGenre: movie.Genre.split(","),
+        movieDuration: parseFloat(movie.Runtime),
+        movieRating: parseFloat(movie.imdbRating),
+        movieYear: parseFloat(movie.Year),
+      }),
+      1000
+    );
     console.log(postData.data);
     console.log(movieObject);
     dispatch(createOmdbSuccess(movieObject));
