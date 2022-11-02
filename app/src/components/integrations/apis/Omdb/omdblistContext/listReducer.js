@@ -33,6 +33,7 @@ const OmdbReducer = (state, action) => {
         omdb: [action.payload, ...state.omdb],
         isFetching: false,
         error: "",
+        addMovieclicked: true,
       };
     case "CREATE_MOVIES_FAILURE":
       return {
