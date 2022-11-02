@@ -6,6 +6,7 @@ const INITIAL_STATE = {
   pageCount: 0,
   isFetching: false,
   error: "",
+  addMovieclicked: false,
 };
 export const OmdblistContext = createContext(INITIAL_STATE);
 
@@ -32,6 +33,7 @@ export const OmdblistContextProvider = ({ children }) => {
         pageId: state.pageId,
         pageCount: state.pageCount,
         error: state.error,
+        addMovieclicked: state.addMovieclicked,
         nextPage,
         prevPage,
         dispatch,

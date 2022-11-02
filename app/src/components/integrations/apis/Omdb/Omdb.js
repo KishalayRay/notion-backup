@@ -29,16 +29,34 @@ import { GetMovies, DeleteMovie } from "./omdblistContext/apiCalls";
 const Omdb = () => {
   const toast = useToast();
   const [load, setLoad] = useState(false);
+  const [deleteclicked, setdelclicked] = useState(false);
   const axiosPrivate = useAxiosPrivate();
-  const { dispatch, omdb, pageId, nextPage, prevPage, pageCount, error } =
-    useContext(OmdblistContext);
+  const {
+    dispatch,
+    omdb,
+    pageId,
+    nextPage,
+    prevPage,
+    pageCount,
+    error,
+    addMovieclicked,
+  } = useContext(OmdblistContext);
   console.log(error, "error");
   useEffect(() => {
     GetMovies(axiosPrivate, dispatch, pageId);
     console.log(dispatch);
-  }, [dispatch, pageId]);
+  }, [dispatch, pageId, addMovieclicked]);
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     GetMovies(axiosPrivate, dispatch, pageId);
+  //   }, 1000);
+  //   return () => clearInterval(interval);
+  // }, []);
+
   const handleDelete = async (id) => {
     setLoad(true);
+    setdelclicked(!deleteclicked);
     console.log(id);
     await DeleteMovie(id, axiosPrivate, dispatch);
     setLoad(false);

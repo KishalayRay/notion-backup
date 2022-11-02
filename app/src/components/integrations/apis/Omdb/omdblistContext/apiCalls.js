@@ -56,6 +56,7 @@ export const CreateMovie = async (movieId, axiosPrivate, dispatch) => {
       movieRating: parseFloat(movie.imdbRating),
       movieYear: parseFloat(movie.Year),
     });
+
     console.log(postData.data);
     console.log(movieObject);
     dispatch(createOmdbSuccess(movieObject));

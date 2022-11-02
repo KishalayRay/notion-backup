@@ -27,7 +27,7 @@ const Omdb = () => {
 
   const { query, searchMovie, movies, addMovie, getApiKey, isLoading } =
     useContext(OmdbContext);
-  const { dispatch, error } = useContext(OmdblistContext);
+  const { dispatch, error, addMovieclicked } = useContext(OmdblistContext);
   const [queryM, setQueryM] = useState("");
   const handleSearch = (e) => {
     e.preventDefault();
