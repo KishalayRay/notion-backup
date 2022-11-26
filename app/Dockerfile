@@ -1,10 +1,10 @@
 FROM node:alpine as builder
 
+ARG NODE_ENV
+
 WORKDIR /app
 
 COPY package*.json .
-
-ARG NODE_ENV
 
 RUN npm install
 
