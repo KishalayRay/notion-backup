@@ -2,7 +2,7 @@ FROM node:alpine
 
 WORKDIR /server
 
-COPY package*.json .
+COPY package*.json ./
 
 ARG NODE_ENV
      
