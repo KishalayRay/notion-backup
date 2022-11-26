@@ -4,7 +4,7 @@ ARG NODE_ENV
 
 WORKDIR /server
 
-COPY package*.json .
+COPY package*.json ./
 
 RUN if [ "$NODE_ENV" = "development" ]; \
      then npm install; \
