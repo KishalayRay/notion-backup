@@ -8,9 +8,7 @@ COPY package*.json ./
 
 RUN npm install
 
-RUN if [ "$NODE_ENV"="production" ]; \
-    then npm run build; \
-    fi
+RUN if [ "$NODE_ENV"="production" ];  then npm run build; fi
 
 COPY . .
 
