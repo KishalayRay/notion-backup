@@ -6,31 +6,30 @@ const { createError } = require("../../utils/error");
 exports.createActivity = async (req, res, next) => {
   try {
     const currDate = new Date().toISOString();
-    const activity = await Calories.findOne({
-      $and: [
-        { name: req.body.name },
-        { date: currDate },
-        { users: req.user.id },
-      ],
-    });
-    console.log(activity);
-    if (activity) {
-      return next(createError(400, "Data already Inserted"));
-    }
-    const update = {
-      $set: {
-        name: req.body.name,
-        duration: req.body.duration,
-        date: currDate,
-        cph: req.body.cph,
-        burned: req.body.burned,
-      },
-      $push: { users: req.user.id },
+    const activityObj = {
+      activityId: req.body.activityId,
+      name: req.body.name,
+      duration: req.body.duration,
+      date: currDate,
+      cph: req.body.cph,
+      burned: req.body.burned,
     };
 
-    await Calories.updateOne({ name: req.body.name }, update, {
-      upsert: true,
-    });
+    const update = {
+      $set: {
+        user: req.user.id,
+      },
+      $push: { data: activityObj },
+    };
+
+    const newActivity = await Calories.updateOne(
+      { user: req.user.id },
+      update,
+      {
+        upsert: true,
+        new: true,
+      }
+    );
 
     const notion = new Client({
       auth: req.notionKey,
@@ -69,7 +68,7 @@ exports.createActivity = async (req, res, next) => {
         },
       });
       const body = {
-        name: req.body.name,
+        name: req.body.activityId,
         pageId: response.id,
       };
       const update = {
@@ -111,13 +110,20 @@ exports.getActivities = async (req, res, next) => {
   }
   const userId = req.user.id;
   try {
-    const activities = await Calories.find({ users: userId });
-    res.status(200).json({
-      data: {
-        count: activities.length,
-        activities: activities,
-      },
-    });
+    const activities = await Calories.find({ user: userId });
+    if (!activities[0]) {
+      res.status(200).json({
+        data: {
+          activities: [],
+        },
+      });
+    } else {
+      res.status(200).json({
+        data: {
+          activities: activities[0].data,
+        },
+      });
+    }
   } catch (error) {
     console.log(error);
     next(error);
@@ -126,32 +132,34 @@ exports.getActivities = async (req, res, next) => {
 exports.deleteActivity = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    console.log(userId);
+
+    console.log(userId, req.params.id, typeof req.params.id);
+    const updateBody = {
+      activityId: req.params.id,
+    };
     const update = {
-      $pull: { users: userId },
+      $pull: { data: updateBody },
     };
 
-    await Calories.findByIdAndUpdate({ _id: req.params.id }, update, {
+    const updateDoc = await Calories.updateOne({ user: req.user.id }, update, {
       new: true,
     });
-    const associateActivity = await Calories.findById({ _id: req.params.id });
-    const name = associateActivity.name;
-
+    console.log(updateDoc);
     const pageDetail = await NotionCaloriesPage.findOne(
       {
         $and: [
           { user: req.user.id },
-          { associateIds: { $elemMatch: { name: name } } },
+          { associateIds: { $elemMatch: { name: req.params.id } } },
         ],
       },
-      { associateIds: { $elemMatch: { name: name } } }
+      { associateIds: { $elemMatch: { name: req.params.id } } }
     );
-    console.log(pageDetail.associateIds[0].pageId);
+    console.log(pageDetail, "pageDetails");
     const notionCredential = await NotionApiKey.findOne(
       {
         $and: [
           { user: req.user.id },
-          { "credentials.apiSlug": "Caloriesburned" },
+          { credentials: { $elemMatch: { apiSlug: "Caloriesburned" } } },
         ],
       },
       { credentials: { $elemMatch: { apiSlug: "Caloriesburned" } } }
@@ -162,7 +170,9 @@ exports.deleteActivity = async (req, res, next) => {
     const notion = new Client({ auth: notionKey });
     const deleteNotionPage = async () => {
       const page = pageDetail.associateIds[0].pageId;
-      const pageExistance = await notion.pages.retrieve({ page_id: page });
+      const pageExistance = await notion.pages.retrieve({
+        page_id: page,
+      });
       console.log(pageExistance.id);
       if (pageExistance.archived === true) {
         return;
@@ -176,7 +186,7 @@ exports.deleteActivity = async (req, res, next) => {
     deleteNotionPage();
     const updatePage = {
       $pull: {
-        associateIds: { name: name },
+        associateIds: { name: req.params.id },
       },
     };
     const deletePage = await NotionCaloriesPage.updateOne(
@@ -185,12 +195,12 @@ exports.deleteActivity = async (req, res, next) => {
       { new: true }
     );
     console.log(deletePage, "Notion Page");
-    const emptyDB = await Calories.findByIdAndUpdate({
-      _id: req.params.id,
-      users: [],
+    const emptyDB = await Calories.findOne({
+      user: req.user.id,
+      data: { $size: 0 },
     });
     if (emptyDB) {
-      await Calories.findByIdAndDelete(req.params.id);
+      await Calories.deleteOne({ user: req.user.id });
     }
     res.status(200).json({
       data: {

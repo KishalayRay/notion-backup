@@ -17,7 +17,7 @@ exports.createTriposo = async (req, res, next) => {
     const update = {
       $set: {
         city: req.body.domain,
-        date: currDate.substring(0, 10),
+        date: currDate,
       },
       $push: { users: req.user.id },
     };

@@ -9,11 +9,7 @@ exports.createLead = async (req, res, next) => {
     const currDate = new Date().toISOString();
 
     const existLead = await hunter.findOne({
-      $and: [
-        { domain: req.body.domain },
-        { date: currDate.substring(0, 10) },
-        { users: req.user.id },
-      ],
+      $and: [{ domain: req.body.domain }, { users: req.user.id }],
     });
     if (existLead) {
       return next(createError(400, "Data already Inserted"));
@@ -21,7 +17,7 @@ exports.createLead = async (req, res, next) => {
     const update = {
       $set: {
         domain: req.body.domain,
-        date: currDate.substring(0, 10),
+        date: currDate,
       },
       $push: { users: req.user.id },
     };

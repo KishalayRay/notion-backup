@@ -1,30 +1,37 @@
 const mongoose = require("mongoose");
+
 const caloriesBurnedSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
+    user: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: "Users",
     },
-    cph: {
-      type: Number,
-      required: true,
-    },
-    duration: {
-      type: Number,
-      required: true,
-    },
-    burned: {
-      type: Number,
-      required: true,
-    },
-    date: {
-      type: String,
-      required: true,
-    },
-    users: [
+    data: [
       {
-        type: mongoose.SchemaTypes.ObjectId,
-        ref: "Users",
+        activityId: {
+          type: String,
+          required: true,
+        },
+        name: {
+          type: String,
+          required: true,
+        },
+        cph: {
+          type: Number,
+          required: true,
+        },
+        duration: {
+          type: Number,
+          required: true,
+        },
+        burned: {
+          type: Number,
+          required: true,
+        },
+        date: {
+          type: Date,
+          required: true,
+        },
       },
     ],
   },

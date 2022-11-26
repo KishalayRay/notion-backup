@@ -12,12 +12,16 @@ import {
   createRecipeSuccess,
   createRecipeFailure,
 } from "./listActions";
-export const GetRecipes = async (axiosPrivate, dispatch) => {
+export const GetRecipes = async (axiosPrivate, dispatch, pageId) => {
   dispatch(getRecipeStart);
   try {
-    const response = await axiosPrivate.get(`/spoonacular/recipes`);
+    const response = await axiosPrivate.get(
+      `/spoonacular/recipes?page=${pageId}`
+    );
 
-    dispatch(getRecipeSuccess(response.data.data.recipes));
+    dispatch(
+      getRecipeSuccess(response.data.data.recipes, response.data.data.pageCount)
+    );
     console.log(response.data.data.recipes);
   } catch (e) {
     dispatch(getRecipeFailure);

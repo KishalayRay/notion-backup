@@ -37,38 +37,14 @@ exports.createRecipe = async (req, res, next) => {
 
     // notion update
 
-    const notionCredential = await NotionApiKey.findOne(
-      {
-        $and: [
-          { user: req.user.id },
-          { credentials: { $elemMatch: { apiSlug: "Spoonacular" } } },
-        ],
-      },
-      { credentials: { $elemMatch: { apiSlug: "Spoonacular" } } }
-    );
-    console.log(notionCredential);
-    const dataBaseId = notionCredential.credentials[0].databaseId;
-    const notionKey = notionCredential.credentials[0].apiKey;
-    console.log(dataBaseId, notionKey);
-
     const notion = new Client({
-      auth: notionKey,
+      auth: req.notionKey,
     });
-    const retrieveDatabase = async () => {
-      const response = await notion.databases.retrieve({
-        database_id: dataBaseId,
-      });
-
-      if (response === null) {
-        return next(createError(400, "Notion Database not found"));
-      }
-    };
-    retrieveDatabase();
 
     const main = async () => {
       const response = await notion.pages.create({
         parent: {
-          database_id: dataBaseId,
+          database_id: req.dataBaseId,
         },
         properties: {
           Meal: {
@@ -86,7 +62,7 @@ exports.createRecipe = async (req, res, next) => {
                 type: "external",
                 name: "meal cover",
                 external: {
-                  url: req.body.recipeImage,
+                  url: req.body.recipeImage || "",
                 },
               },
             ],
@@ -153,10 +129,11 @@ exports.createRecipe = async (req, res, next) => {
 };
 exports.getRecipes = async (req, res, next) => {
   const page = req.query.page * 1 || 1;
-  const limit = 5;
+  const limit = 6;
   const skip = (page - 1) * limit;
+  const numRecipes = await Spoonacular.countDocuments();
+  const pageCount = Math.ceil(numRecipes / limit);
   if (req.query.page) {
-    const numRecipes = await Spoonacular.countDocuments();
     if (skip > numRecipes) {
       return next(
         createError(400, "This page does not existThis page does not exist")
@@ -165,12 +142,14 @@ exports.getRecipes = async (req, res, next) => {
   }
   const userId = req.user.id;
   try {
-    const recipes = await Spoonacular.find({ users: userId }).sort({
-      createdAt: -1,
-    });
+    const recipes = await Spoonacular.find({ users: userId })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
     res.status(200).json({
       data: {
         count: recipes.length,
+        pageCount: pageCount,
         recipes: recipes,
       },
     });

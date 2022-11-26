@@ -110,7 +110,7 @@ const CaloriesBurned = () => {
               <Tbody>
                 {activity.map((exercise) => {
                   return (
-                    <Tr key={exercise._id}>
+                    <Tr key={exercise.activityId}>
                       <Td>{exercise.name}</Td>
                       <Td>{exercise.cph}</Td>
                       <Td>{exercise.duration} min</Td>
@@ -119,7 +119,7 @@ const CaloriesBurned = () => {
                         <Button
                           size="sm"
                           isLoading={load ? true : false}
-                          onClick={() => handleDelete(exercise._id)}
+                          onClick={() => handleDelete(exercise.activityId)}
                         >
                           {" "}
                           <DeleteIcon />

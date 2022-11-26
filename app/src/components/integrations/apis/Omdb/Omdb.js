@@ -3,6 +3,7 @@ import {
   Box,
   Center,
   Stack,
+  VStack,
   Image,
   Button,
   useColorModeValue,
@@ -29,18 +30,20 @@ import { GetMovies, DeleteMovie } from "./omdblistContext/apiCalls";
 const Omdb = () => {
   const toast = useToast();
   const [load, setLoad] = useState(false);
+  const [deleteClicked, setDeleteClicked] = useState(false);
   const axiosPrivate = useAxiosPrivate();
   const { dispatch, omdb, pageId, nextPage, prevPage, pageCount, error } =
     useContext(OmdblistContext);
-  console.log(error, "error");
+
   useEffect(() => {
     GetMovies(axiosPrivate, dispatch, pageId);
-    console.log(dispatch);
-  }, [dispatch, pageId]);
+    console.log(deleteClicked, "deleteClicked");
+  }, [dispatch, pageId, deleteClicked]);
   const handleDelete = async (id) => {
     setLoad(true);
     console.log(id);
     await DeleteMovie(id, axiosPrivate, dispatch);
+    setDeleteClicked(!deleteClicked);
     setLoad(false);
   };
 
@@ -87,7 +90,7 @@ const Omdb = () => {
       <Center py={6}>
         <Box
           maxW={"800px"}
-          height={"680px"}
+          height={"640px"}
           w={"full"}
           bg={useColorModeValue("white", "gray.900")}
           boxShadow={"2xl"}
@@ -127,7 +130,7 @@ const Omdb = () => {
                 {omdb.map((movie) => {
                   return (
                     <Tr key={movie.movieId}>
-                      <Td>{movie.movieTitle}</Td>
+                      <Td>{movie.movieTitle.slice(0, 14)}</Td>
                       <Td>
                         <Image
                           htmlHeight="45px"
@@ -152,7 +155,9 @@ const Omdb = () => {
                         <Button
                           size="sm"
                           isLoading={load ? true : false}
-                          onClick={() => handleDelete(movie._id)}
+                          onClick={() => {
+                            handleDelete(movie._id);
+                          }}
                         >
                           {" "}
                           <DeleteIcon />
@@ -163,7 +168,7 @@ const Omdb = () => {
                 })}
               </Tbody>
             </Table>
-            <Flex align="center" justify="space-between" my="4">
+            <Flex align="center" justify="space-between" py={4}>
               <Text
                 color={useColorModeValue("gray.600", "gray.400")}
                 fontSize="sm"

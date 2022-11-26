@@ -18,6 +18,7 @@ exports.createCoin = async (req, res, next) => {
     }
     const update = {
       $set: {
+        coinName: req.body.coinName,
         coinSymbol: req.body.coinSymbol,
         coinPrice: req.body.coinPrice,
         coinDayChange: req.body.coinDayChange,
@@ -31,43 +32,29 @@ exports.createCoin = async (req, res, next) => {
     await Coin.updateOne({ coinSymbol: req.body.coinSymbol }, update, {
       upsert: true,
     });
-    // notion update
-
-    const notionCredential = await NotionApiKey.findOne(
-      {
-        $and: [
-          { user: req.user.id },
-          { credentials: { $elemMatch: { apiSlug: "Coinranking" } } },
-        ],
-      },
-      { credentials: { $elemMatch: { apiSlug: "Coinranking" } } }
-    );
-    console.log(notionCredential);
-    const dataBaseId = notionCredential.credentials[0].databaseId;
-    const notionKey = notionCredential.credentials[0].apiKey;
-    console.log(dataBaseId, notionKey);
 
     const notion = new Client({
-      auth: notionKey,
+      auth: req.notionKey,
     });
-    const retrieveDatabase = async () => {
-      const response = await notion.databases.retrieve({
-        database_id: dataBaseId,
-      });
-      if (response === null) {
-        return next(createError(400, "Notion Database not found"));
-      }
-    };
-    retrieveDatabase();
 
     const main = async () => {
       const response = await notion.pages.create({
         parent: {
-          database_id: dataBaseId,
+          database_id: req.dataBaseId,
         },
         properties: {
           Coin: {
             title: [
+              {
+                type: "text",
+                text: {
+                  content: req.body.coinName,
+                },
+              },
+            ],
+          },
+          Symbol: {
+            rich_text: [
               {
                 type: "text",
                 text: {
@@ -77,19 +64,19 @@ exports.createCoin = async (req, res, next) => {
             ],
           },
           Price: {
-            number: req.body.coinPrice,
+            number: parseFloat(req.body.coinPrice),
           },
-          Day_Change: {
-            number: req.body.coinDayChange,
+          "Day Change": {
+            number: parseFloat(req.body.coinDayChange) / 100,
           },
-          Market_Cap: {
-            number: req.body.coinMarketCap,
+          "Market Cap": {
+            number: parseFloat(req.body.coinMarketCap),
           },
           "Circulating Supply": {
-            number: req.body.coinCirculation,
+            number: parseFloat(req.body.coinCirculation),
           },
           Rank: {
-            number: req.body.coinRank,
+            number: parseFloat(req.body.coinRank),
           },
         },
       });
@@ -129,7 +116,7 @@ exports.getCoins = async (req, res, next) => {
   const skip = (page - 1) * limit;
   if (req.query.page) {
     const numCoins = await Coin.countDocuments();
-    if (skip > Day_Change) {
+    if (skip > numCoins) {
       return next(
         createError(400, "This page does not existThis page does not exist")
       );
@@ -186,7 +173,7 @@ exports.deleteCoin = async (req, res, next) => {
 
     const updatePage = {
       $pull: {
-        associateIds: { stockSymbol: stockSymbol },
+        associateIds: { coinSymbol: coinSymbol },
       },
     };
     const deletePage = await NotionCoinDataPage.updateOne(
@@ -197,7 +184,7 @@ exports.deleteCoin = async (req, res, next) => {
     console.log(deletePage, "Notion Page");
     const emptyDB = await Coin.findByIdAndUpdate({
       _id: req.params.id,
-      users: [],
+      users: { $size: 0 },
     });
     if (emptyDB) {
       await Coin.findByIdAndDelete(req.params.id);
@@ -218,7 +205,7 @@ exports.deleteCoin = async (req, res, next) => {
     deleteNotionPage();
     res.status(200).json({
       data: {
-        message: "Sockdata deleted",
+        message: "Coin deleted",
       },
     });
   } catch (error) {

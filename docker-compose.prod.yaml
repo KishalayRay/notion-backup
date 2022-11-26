@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  backend_api:
+    build:
+      context: ./server
+      args:
+        NODE_ENV: production
+    environment:
+      - NODE_ENV=production
+    command: npm run start
+  client:
+    build:
+      context: ./app
+      args:
+        NODE_ENV: production
+    environment:
+      - NODE_ENV=production
+    command: npm run start

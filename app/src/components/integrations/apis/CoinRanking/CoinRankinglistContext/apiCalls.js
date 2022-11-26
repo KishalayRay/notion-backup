@@ -32,18 +32,20 @@ export const CreateCoin = async (coinSymbol, axiosPrivate, dispatch) => {
     const coin = response.data;
     console.log(coin);
     const coinObject = {
+      coinName: coin.name,
       coinSymbol: coin.symbol,
-      coinPrice: coin.quotes.USD.price,
-      coinDayChange: coin.quotes.USD.volume_24h_change_24h,
+      coinPrice: coin.quotes.USD.price.toFixed(4),
+      coinDayChange: coin.quotes.USD.market_cap_change_24h,
       coinCirculation: coin.circulating_supply,
       coinRank: coin.rank,
       coinMarketCap: coin.quotes.USD.market_cap,
     };
 
     const postData = await axiosPrivate.post(`/coinranking/newcoin`, {
+      coinName: coin.name,
       coinSymbol: coin.symbol,
-      coinPrice: coin.quotes.USD.price,
-      coinDayChange: coin.quotes.USD.volume_24h_change_24h,
+      coinPrice: coin.quotes.USD.price.toFixed(4),
+      coinDayChange: coin.quotes.USD.market_cap_change_24h,
       coinCirculation: coin.circulating_supply,
       coinRank: coin.rank,
       coinMarketCap: coin.quotes.USD.market_cap,

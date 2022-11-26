@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const coinRankingSchema = new mongoose.Schema(
   {
+    coinName: {
+      type: String,
+      required: true,
+    },
     coinSymbol: {
       type: String,
       required: true,
@@ -36,4 +40,4 @@ const coinRankingSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-module.exports = new mongoose.model("CoinRanking", coinRankingSchema);
+module.exports = new mongoose.model("Coinranking", coinRankingSchema);

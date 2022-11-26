@@ -8,6 +8,7 @@ import {
   useColorModeValue,
   TableContainer,
   Table,
+  Spinner,
   Thead,
   Tr,
   Th,
@@ -428,8 +429,14 @@ const Calendarific = () => {
   const { dispatch, holiday } = useContext(CalendarificContext);
   const [code, setCode] = useState("");
   const [load, setLoad] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   useEffect(() => {
-    GetHolidays(axiosPrivate, dispatch);
+    const a = async () => {
+      setIsFetching(true);
+      await GetHolidays(axiosPrivate, dispatch);
+      setIsFetching(false);
+    };
+    a();
   }, [dispatch]);
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -438,101 +445,113 @@ const Calendarific = () => {
     await CreateHoliday(code, axiosPrivate, dispatch);
     setLoad(false);
   };
-
+  const bg = useColorModeValue("white", "gray.900");
   return (
-    <Stack>
-      <Center py={6}>
-        <Box
-          maxW={"800px"}
-          maxH={"1600px"}
-          w={"full"}
-          bg={useColorModeValue("white", "gray.900")}
-          boxShadow={"2xl"}
-          rounded={"md"}
-          p={6}
-          overflow={"hidden"}
-        >
+    <>
+      {isFetching ? (
+        <>
+          <Spinner />
+        </>
+      ) : (
+        <>
           <Stack>
-            <center>
-              <Stack direction={"row"} spacing={4} pl={12}>
-                <Text
-                  fontSize={"2xl"}
-                  fontWeight={500}
-                  fontFamily={"body"}
-                  pb={4}
-                >
-                  Country:
-                </Text>
-                <Select
-                  placeholder="Select option"
-                  w={"400px"}
-                  name="country"
-                  onChange={(e) => setCode(e.target.value)}
-                >
-                  {countries.map((country) => {
-                    return (
-                      <option value={country["code"]}>{country["name"]}</option>
-                    );
-                  })}
-                </Select>
+            <Center py={6}>
+              <Box
+                maxW={"800px"}
+                maxH={"1600px"}
+                w={"full"}
+                bg={bg}
+                boxShadow={"2xl"}
+                rounded={"md"}
+                p={6}
+                overflow={"hidden"}
+              >
+                <Stack>
+                  <center>
+                    <Stack direction={"row"} spacing={4} pl={12}>
+                      <Text
+                        fontSize={"2xl"}
+                        fontWeight={500}
+                        fontFamily={"body"}
+                        pb={4}
+                      >
+                        Country:
+                      </Text>
+                      <Select
+                        placeholder="Select option"
+                        w={"400px"}
+                        name="country"
+                        onChange={(e) => setCode(e.target.value)}
+                      >
+                        {countries.map((country) => {
+                          return (
+                            <option value={country["code"]}>
+                              {country["name"]}
+                            </option>
+                          );
+                        })}
+                      </Select>
 
-                {holiday.length === 0 && (
-                  <Button
-                    colorScheme="purple"
-                    loadingText="Submitting"
-                    onClick={handleSubmit}
-                    isLoading={load ? true : false}
-                  >
-                    Submit
-                  </Button>
-                )}
-              </Stack>
-            </center>
+                      {holiday.length === 0 && (
+                        <Button
+                          colorScheme="purple"
+                          loadingText="Submitting"
+                          onClick={handleSubmit}
+                          isLoading={load ? true : false}
+                        >
+                          Submit
+                        </Button>
+                      )}
+                    </Stack>
+                  </center>
+                </Stack>
+              </Box>
+            </Center>
+            <Center py={6}>
+              <Box
+                maxW={"800px"}
+                maxH={"1600px"}
+                w={"full"}
+                bg={bg}
+                boxShadow={"2xl"}
+                rounded={"md"}
+                p={6}
+                overflow={"hidden"}
+              >
+                <TableContainer>
+                  <Table variant="simple">
+                    <Thead>
+                      <Tr>
+                        <Th>
+                          {" "}
+                          <Text fontWeight={600}>Holiday</Text>
+                        </Th>
+
+                        <Th>
+                          {" "}
+                          <Text fontWeight={600}>Date</Text>
+                        </Th>
+                      </Tr>
+                    </Thead>
+
+                    <Tbody>
+                      {holiday.map((day) => {
+                        return (
+                          <Tr key={day._id}>
+                            <Td>{day.name}</Td>
+                            <Td>{day.date.substring(0, 10)}</Td>
+                          </Tr>
+                        );
+                      })}
+                    </Tbody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            </Center>
           </Stack>
-        </Box>
-      </Center>
-      <Center py={6}>
-        <Box
-          maxW={"800px"}
-          maxH={"1600px"}
-          w={"full"}
-          bg={useColorModeValue("white", "gray.900")}
-          boxShadow={"2xl"}
-          rounded={"md"}
-          p={6}
-          overflow={"hidden"}
-        >
-          <TableContainer>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th>
-                    {" "}
-                    <Text fontWeight={600}>Holiday</Text>
-                  </Th>
-
-                  <Th>
-                    {" "}
-                    <Text fontWeight={600}>Date</Text>
-                  </Th>
-                </Tr>
-              </Thead>
-
-              <Tbody>
-                {holiday.map((day) => {
-                  return (
-                    <Tr key={day._id}>
-                      <Td>{day.name}</Td>
-                      <Td>{day.date.substring(0, 10)}</Td>
-                    </Tr>
-                  );
-                })}
-              </Tbody>
-            </Table>
-          </TableContainer>
-        </Box>
-      </Center>
-    </Stack>
+        </>
+      )}
+    </>
   );
 };
 export default Calendarific;

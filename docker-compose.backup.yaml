@@ -3,22 +3,28 @@ services:
   backend_api:
     restart: always
     build: ./server
+    volumes:
+      - ./server/src:/server/src
+    # ports:
+    #   - 8000:8000
     container_name: backend_api
-
   client:
     restart: always
     stdin_open: true
     tty: true
     build: ./app
+    volumes:
+      - ./app/src:/app/src
+    # ports:
+    #   - 3000:3000
     container_name: client
     depends_on:
       - backend_api
-
   nginx:
     restart: always
-    build: ./nginx
     depends_on:
       - backend_api
       - client
+    build: ./nginx
     ports:
-      - 8000:80
+      - 8080:80

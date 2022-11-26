@@ -15,7 +15,6 @@ exports.createBook = async (req, res, next) => {
       return next(createError(400, "Data already Inserted"));
     }
 
-    console.log(logResults);
     const update = {
       $set: {
         bookId: req.body.bookId,

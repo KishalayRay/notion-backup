@@ -46,7 +46,7 @@ const CaloriesBurnedReducer = (state, action) => {
     case "DELETE_ACTIVITIES_SUCCESS":
       return {
         activity: state.activity.filter((exercise) => {
-          return exercise._id !== action.payload;
+          return exercise.activityId !== action.payload;
         }),
         isFetching: false,
         error: false,
@@ -57,6 +57,27 @@ const CaloriesBurnedReducer = (state, action) => {
         isFetching: false,
         error: true,
       };
+    case "NEXT_PAGE": {
+      let page = state.pageId + 1;
+      if (page > state.pageCount) {
+        page = 1;
+      }
+      return {
+        ...state,
+        pageId: page,
+      };
+    }
+
+    case "PREV_PAGE": {
+      let page = state.pageId - 1;
+      if (page < 1) {
+        page = 1;
+      }
+      return {
+        ...state,
+        pageId: page,
+      };
+    }
     default: {
       return {
         ...state,

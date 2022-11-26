@@ -524,7 +524,7 @@ const TheNewsApi = () => {
                   return (
                     <Tr key={bulletin._id}>
                       <Td>{`${bulletin.title.slice(0, 50)}...`}</Td>
-                      <Td>{bulletin.time.slice(0, 10)}</Td>
+                      <Td>{bulletin.time.substring(0, 10)}</Td>
                     </Tr>
                   );
                 })}

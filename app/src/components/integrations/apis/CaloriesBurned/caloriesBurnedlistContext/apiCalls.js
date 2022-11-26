@@ -10,6 +10,7 @@ import {
   createActivitySuccess,
   createActivityFailure,
 } from "./listActions";
+import uniqid from "uniqid";
 export const GetActivities = async (axiosPrivate, dispatch) => {
   dispatch(getActivityStart);
   try {
@@ -47,6 +48,7 @@ export const CreateActivity = async (
     const activity = activities[index];
     console.log(activity);
     const activityObject = {
+      activityId: uniqid(),
       name: activity.name,
       duration: activity.duration_minutes,
       cph: activity.calories_per_hour,
@@ -54,6 +56,7 @@ export const CreateActivity = async (
     };
 
     const postData = await axiosPrivate.post(`/caloriesburned/newActivity`, {
+      activityId: uniqid(),
       name: activity.name,
       duration: activity.duration_minutes,
       cph: activity.calories_per_hour,

@@ -62,25 +62,27 @@ const OmdbReducer = (state, action) => {
         isFetching: false,
         error: "",
       };
-    case "NEXT_PAGE":
-      // let page = state.pageId + 1;
-      // if (page >= state.pageCount) {
-      //   page = 1;
-      // }
+    case "NEXT_PAGE": {
+      let page = state.pageId + 1;
+      if (page > state.pageCount) {
+        page = 1;
+      }
       return {
         ...state,
-        pageId: state.pageId + 1,
+        pageId: page,
       };
+    }
 
-    case "PREV_PAGE":
-      // let page = state.pageId - 1;
-      // if (page <= 1) {
-      //   page = 1;
-      // }
+    case "PREV_PAGE": {
+      let page = state.pageId - 1;
+      if (page < 1) {
+        page = 1;
+      }
       return {
         ...state,
-        pageId: state.pageId - 1,
+        pageId: page,
       };
+    }
 
     default: {
       return {

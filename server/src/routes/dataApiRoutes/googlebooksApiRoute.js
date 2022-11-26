@@ -6,8 +6,9 @@ const {
   getBooks,
   deleteBook,
 } = require("../../controllers/dataApiControllers/googlebooksApiController");
+const bookMiddleware = require("../../middlewares/dataApiMiddlewares/googleBooksMiddleware");
 
-router.post("/newbook", verify, createBook);
+router.post("/newbook", verify, bookMiddleware, createBook);
 router.get("/books", verify, getBooks);
 router.put("/:id", verify, deleteBook);
 module.exports = router;

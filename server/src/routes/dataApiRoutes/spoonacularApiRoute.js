@@ -6,9 +6,9 @@ const {
   getRecipes,
   deleteRecipe,
 } = require("../../controllers/dataApiControllers/spoonacularApiController");
-//const RecipeMiddleware = require("../../middlewares/RecipeMiddleware");
+const spoonacularMiddleware = require("../../middlewares/dataApiMiddlewares/spoonacularMiddleware");
 
-router.post("/newrecipe", verify, createRecipe);
+router.post("/newrecipe", verify, spoonacularMiddleware, createRecipe);
 router.get("/recipes", verify, getRecipes);
 router.put("/:id", verify, deleteRecipe);
 module.exports = router;

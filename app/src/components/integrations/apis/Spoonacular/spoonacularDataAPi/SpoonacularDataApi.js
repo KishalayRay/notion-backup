@@ -22,6 +22,7 @@ import { CreateRecipe } from "../SpoonacularlistContext/apiCalls";
 import useAxiosPrivate from "../../../../../hooks/useAxiosPrivate";
 const Spoonacular = () => {
   const axiosPrivate = useAxiosPrivate();
+  const [isDisabled, setIsDisabled] = useState(false);
   const { query, searchRecipe, recipes, addRecipe, getApiKey, isLoading } =
     useContext(SpoonacularContext);
   const { dispatch } = useContext(SpoonacularlistContext);
@@ -53,6 +54,7 @@ const Spoonacular = () => {
                   <Button
                     w={"full"}
                     maxW={"sm"}
+                    disabled={isDisabled}
                     color={"grey.400"}
                     rightIcon={<RepeatIcon />}
                   >
@@ -88,7 +90,7 @@ const Spoonacular = () => {
                 <Input
                   pr="4.5rem"
                   type="text"
-                  placeholder="Search movies or series..."
+                  placeholder="Search recipes..."
                   value={queryM}
                   onChange={(e) => {
                     setQueryM(e.target.value);
@@ -145,6 +147,10 @@ const Spoonacular = () => {
                           onClick={() => {
                             CreateRecipe(recipe.id, axiosPrivate, dispatch);
                             addRecipe(recipe.id);
+                            setIsDisabled(true);
+                            setTimeout(() => {
+                              setIsDisabled(false);
+                            }, 2000);
                           }}
                         >
                           Add

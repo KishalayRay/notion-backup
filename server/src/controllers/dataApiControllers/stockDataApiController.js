@@ -126,7 +126,9 @@ exports.getStocks = async (req, res, next) => {
   }
   const userId = req.user.id;
   try {
-    const stocks = await StockData.find({ users: userId });
+    const stocks = await StockData.find({ users: userId }).sort({
+      createdAt: -1,
+    });
     res.status(200).json({
       data: {
         count: stocks.length,

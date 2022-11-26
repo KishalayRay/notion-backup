@@ -14,6 +14,7 @@ const HOST = "0.0.0.0";
 app.use(helmet());
 
 app.use(cookieParser());
+app.enable("trust proxy");
 app.use(cors({ credentials: true, origin: true })); //http://localhost:8080
 const authRoute = require("./routes/configRoutes/authRoute");
 const apiListRoute = require("./routes/configRoutes/apiListRoute");
@@ -44,7 +45,9 @@ const DB = process.env.MONGO_URI.replace("<password>", process.env.PASSWORD);
 //const DB = process.env.MONGO_URI;
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(DB, { autoIndex: false });
+    const conn = await mongoose.connect(DB, {
+      autoIndex: false,
+    });
     console.log(`connetion succesful ${conn.connection.host}`);
   } catch (e) {
     console.log(e);
@@ -52,8 +55,8 @@ const connectDB = async () => {
   }
 };
 connectDB();
-
 app.use(morgan("tiny"));
+0;
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));

@@ -95,7 +95,7 @@ const CoinRanking = () => {
                 {coins.map((coin) => {
                   return (
                     <Tr>
-                      <Td>{coin.coinSymbol}</Td>
+                      <Td>{coin.coinName.slice(0, 14)}</Td>
                       <Td>{coin.coinPrice}</Td>
                       <Td>{coin.coinDayChange}%</Td>
                       <Td>{coin.coinMarketCap}</Td>

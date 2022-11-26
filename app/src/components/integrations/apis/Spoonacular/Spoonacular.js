@@ -14,6 +14,8 @@ import {
   Th,
   Tbody,
   Td,
+  Flex,
+  ButtonGroup,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import useAxiosPrivate from "../../../../hooks/useAxiosPrivate";
@@ -24,16 +26,19 @@ import { SpoonacularlistContext } from "./SpoonacularlistContext/listContext";
 import { GetRecipes, DeleteRecipe } from "./SpoonacularlistContext/apiCalls";
 const Spoonacular = () => {
   const [load, setLoad] = useState(false);
+  const [deleteClicked, setDeleteClicked] = useState(false);
   const axiosPrivate = useAxiosPrivate();
-  const { dispatch, recipes } = useContext(SpoonacularlistContext);
-
+  const { dispatch, recipes, pageId, nextPage, prevPage, pageCount, error } =
+    useContext(SpoonacularlistContext);
+  console.log(pageId, "pageId");
   useEffect(() => {
-    GetRecipes(axiosPrivate, dispatch);
-  }, [dispatch]);
+    GetRecipes(axiosPrivate, dispatch, pageId);
+  }, [dispatch, pageId, deleteClicked]);
   const handleDelete = async (id) => {
     setLoad(true);
     console.log(id);
     await DeleteRecipe(id, axiosPrivate, dispatch);
+    setDeleteClicked(!deleteClicked);
     setLoad(false);
   };
 
@@ -73,7 +78,7 @@ const Spoonacular = () => {
       <Center py={6}>
         <Box
           maxW={"800px"}
-          maxH={"1600px"}
+          height={"640px"}
           w={"full"}
           bg={useColorModeValue("white", "gray.900")}
           boxShadow={"2xl"}
@@ -113,7 +118,7 @@ const Spoonacular = () => {
                 {recipes.map((recipe) => {
                   return (
                     <Tr key={recipe.recipeId}>
-                      <Td>{recipe.recipeName}</Td>
+                      <Td>{recipe.recipeName.slice(0, 20)}</Td>
                       <Td>
                         <Image
                           htmlHeight="60px"
@@ -148,6 +153,30 @@ const Spoonacular = () => {
                 })}
               </Tbody>
             </Table>
+            <Flex align="center" justify="space-between" py={4}>
+              <Text
+                color={useColorModeValue("gray.600", "gray.400")}
+                fontSize="sm"
+              >
+                {pageId} of {pageCount} pages
+              </Text>
+              <ButtonGroup variant="outline" size="sm">
+                <Button
+                  onClick={() => {
+                    prevPage();
+                  }}
+                >
+                  Previous
+                </Button>
+                <Button
+                  onClick={() => {
+                    nextPage();
+                  }}
+                >
+                  Next
+                </Button>
+              </ButtonGroup>
+            </Flex>
           </TableContainer>
         </Box>
       </Center>

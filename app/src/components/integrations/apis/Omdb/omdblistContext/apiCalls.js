@@ -41,7 +41,7 @@ export const CreateMovie = async (movieId, axiosPrivate, dispatch) => {
       movieId: movie.imdbID,
       movieTitle: movie.Title,
       movieImage: movie.Poster,
-      movieGenre: movie.Genre.split(",")[0],
+      movieGenre: movie.Genre.split(","),
       movieDuration: parseFloat(movie.Runtime),
       movieRating: parseFloat(movie.imdbRating),
       movieYear: parseFloat(movie.Year),

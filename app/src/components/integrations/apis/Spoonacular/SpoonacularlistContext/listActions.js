@@ -1,9 +1,9 @@
 export const getRecipeStart = () => ({
   type: "GET_RECIPE_START",
 });
-export const getRecipeSuccess = (recipe) => ({
+export const getRecipeSuccess = (recipes, pageCount) => ({
   type: "GET_RECIPE_SUCCESS",
-  payload: recipe,
+  payload: { recipes, pageCount },
 });
 export const getRecipeFailure = () => ({
   type: "GET_RECIPE_FAILURE",
