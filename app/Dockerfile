@@ -8,9 +8,11 @@ COPY package*.json ./
 
 RUN npm install
 
+COPY . .
+
 RUN if [ "$NODE_ENV"="production" ];  then npm run build; fi
 
-COPY . .
+
 
 EXPOSE 3000
 
