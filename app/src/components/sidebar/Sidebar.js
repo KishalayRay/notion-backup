@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import useLogout from "../../hooks/useLogout";
 import useAuth from "../../hooks/useAuth";
+import { useQuery } from "react-query";
 import {
   IconButton,
   Avatar,
@@ -105,34 +106,40 @@ const NavItem = ({ icon, children, ...rest }) => {
 };
 
 const MobileNav = ({ onOpen, ...rest }) => {
+  const bg = useColorModeValue("white", "gray.900");
+  const borderBottomColor = useColorModeValue("gray.200", "gray.700");
   const { auth } = useAuth();
   const navigate = useNavigate();
   const logout = useLogout();
   const axiosPrivate = useAxiosPrivate();
-  const [user, setUser] = useState({});
+
   const signOut = async () => {
     await logout();
 
     navigate("/");
   };
+
   const fetchUser = async () => {
     const response = await axiosPrivate.get(`/auth/user`);
     console.log(response.data.data.user);
-    setUser(response.data.data.user);
+    return response.data.data.user.username;
   };
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  const {
+    isLoading: isLoading,
+    isError: isError,
+    error: error,
+    data: user,
+  } = useQuery("user", fetchUser);
   return (
     <Flex
       ml={{ base: 0, md: 60 }}
       px={{ base: 4, md: 4 }}
       height="20"
       alignItems="center"
-      bg={useColorModeValue("white", "gray.900")}
+      bg={bg}
       borderBottomWidth="1px"
-      borderBottomColor={useColorModeValue("gray.200", "gray.700")}
+      borderBottomColor={borderBottomColor}
       justifyContent={{ base: "space-between", md: "flex-end" }}
       {...rest}
     >
@@ -160,7 +167,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
             Upgrade
           </Badge>
         </Link>
-        {JSON.stringify(auth)}
+
         <IconButton
           size="lg"
           variant="ghost"
@@ -175,27 +182,21 @@ const MobileNav = ({ onOpen, ...rest }) => {
               _focus={{ boxShadow: "none" }}
             >
               <HStack>
-                <Avatar
-                  size={"sm"}
-                  src="https://img.icons8.com/cotton/344/super-mario.png"
-                />
+                <Avatar size={"sm"} name={user} />
                 <VStack
                   display={{ base: "none", md: "flex" }}
                   alignItems="flex-start"
                   spacing="1px"
                   ml="2"
                 >
-                  <Text fontSize="sm">{user.username}</Text>
+                  <Text fontSize="sm">{user}</Text>
                 </VStack>
                 <Box display={{ base: "none", md: "flex" }}>
                   <FiChevronDown />
                 </Box>
               </HStack>
             </MenuButton>
-            <MenuList
-              bg={useColorModeValue("white", "gray.900")}
-              borderColor={useColorModeValue("gray.200", "gray.700")}
-            >
+            <MenuList bg={bg} borderColor={borderBottomColor}>
               <Link to="/account">
                 <MenuItem>Profile</MenuItem>
               </Link>

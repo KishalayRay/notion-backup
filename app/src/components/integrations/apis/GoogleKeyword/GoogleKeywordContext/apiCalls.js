@@ -7,6 +7,9 @@ import {
   createKeywordStart,
   createKeywordSuccess,
   createKeywordFailure,
+  deleteKeywordStart,
+  deleteKeywordSuccess,
+  deleteKeywordFailure,
 } from "./listActions";
 export const GetKeywords = async (axiosPrivate, dispatch) => {
   dispatch(getKeywordStart);
@@ -39,5 +42,17 @@ export const CreateKeyword = async (query, axiosPrivate, dispatch) => {
   } catch (e) {
     console.log(e);
     dispatch(createKeywordFailure);
+  }
+};
+export const DeleteKeyword = async (id, axiosPrivate, dispatch) => {
+  dispatch(deleteKeywordStart);
+
+  try {
+    await axiosPrivate.put(`/googlekeyword/${id}`, {});
+
+    dispatch(deleteKeywordSuccess(id));
+  } catch (e) {
+    console.log(e);
+    dispatch(deleteKeywordFailure);
   }
 };

@@ -20,16 +20,7 @@ exports.createCompany = async (req, res, next) => {
         company: req.body.company,
         sector: req.body.sector,
         site: req.body.site,
-        location: req.body.location,
         foundedYear: req.body.foundedYear,
-        description: req.body.description,
-        valuation: req.body.valuation,
-        raised: req.body.raised,
-        employees: req.body.employees,
-        revenue: req.body.revenue,
-        rank: req.body.rank,
-        followers: req.body.followers,
-        aliases: req.body.aliases,
       },
       $push: { users: req.user.id },
     };
@@ -57,110 +48,109 @@ exports.createCompany = async (req, res, next) => {
     const notion = new Client({
       auth: notionKey,
     });
-    const retrieveDatabase = async () => {
-      const response = await notion.databases.retrieve({
-        database_id: dataBaseId,
-      });
-
-      if (response === null) {
-        return next(createError(400, "Notion Database not found"));
-      }
-    };
-    retrieveDatabase();
 
     const main = async () => {
-      const response = await notion.pages.create({
-        parent: {
-          database_id: dataBaseId,
-        },
-        properties: {
-          Company: {
-            title: [
-              {
-                text: {
-                  content: req.body.company,
+      try {
+        const response = await notion.pages.create({
+          parent: {
+            database_id: dataBaseId,
+          },
+          properties: {
+            Company: {
+              title: [
+                {
+                  text: {
+                    content: req.body.company,
+                  },
                 },
-              },
-            ],
-          },
-          Site: {
-            url: req.body.site,
-          },
+              ],
+            },
+            Site: {
+              url: req.body.site,
+            },
 
-          Sector: {
-            multi_select: req.body.sector.map((industry) => {
-              return {
-                name: industry,
-              };
-            }),
-          },
+            Sector: {
+              multi_select: req.body.sector.map((industry) => {
+                return {
+                  name: industry,
+                };
+              }),
+            },
 
-          Aliases: {
-            multi_select: req.body.aliases.map((alias) => {
-              return {
-                name: alias.replace(/,/g, " "),
-              };
-            }),
-          },
-          FoundedYear: {
-            number: req.body.foundedYear,
-          },
-          "Market Valuation": {
-            number: req.body.valuation,
-          },
-          "Money Raised": {
-            number: req.body.raised,
-          },
-          "Anual Revenue": {
-            number: req.body.revenue,
-          },
-          "Alexa Rank": {
-            number: req.body.rank,
-          },
-          "Twitter Follower": {
-            number: req.body.followers,
-          },
-          Employees: {
-            number: req.body.employees,
-          },
-          Description: {
-            rich_text: [
-              {
-                text: {
-                  content: req.body.description,
+            Aliases: {
+              multi_select: req.body.aliases.map((alias) => {
+                return {
+                  name: alias.replace(/,/g, " "),
+                };
+              }),
+            },
+            FoundedYear: {
+              number: req.body.foundedYear,
+            },
+            "Market Valuation": {
+              number: req.body.valuation,
+            },
+            "Money Raised": {
+              number: req.body.raised,
+            },
+            "Anual Revenue": {
+              number: req.body.revenue,
+            },
+            "Alexa Rank": {
+              number: req.body.rank,
+            },
+            "Twitter Follower": {
+              number: req.body.followers,
+            },
+            Employees: {
+              number: req.body.employees,
+            },
+            Description: {
+              rich_text: [
+                {
+                  text: {
+                    content: req.body.description,
+                  },
                 },
-              },
-            ],
-          },
+              ],
+            },
 
-          Location: {
-            rich_text: [
-              {
-                type: "text",
-                text: {
-                  content: req.body.location,
+            Location: {
+              rich_text: [
+                {
+                  type: "text",
+                  text: {
+                    content: req.body.location,
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
-        },
-      });
-      const body = {
-        companyId: req.body.companyId,
-        pageId: response.id,
-      };
-      const update = {
-        $set: { user: req.user.id },
-        $push: { associateIds: body },
-      };
-      const createPage = await NotionBigPicturePage.updateOne(
-        { user: req.user.id },
-        update,
-        {
-          upsert: true,
+        });
+        const body = {
+          companyId: req.body.companyId,
+          pageId: response.id,
+        };
+        const update = {
+          $set: { user: req.user.id },
+          $push: { associateIds: body },
+        };
+        const createPage = await NotionBigPicturePage.updateOne(
+          { user: req.user.id },
+          update,
+          {
+            upsert: true,
+          }
+        );
+        console.log(createPage);
+      } catch (err) {
+        if (err.code === APIErrorCode.ObjectNotFound) {
+          return next(createError(400, "Notion Error"));
+        } else {
+          // Other error handling code
+          return next(createError(400, "Notion Error"));
         }
-      );
-      console.log(createPage);
+      }
     };
 
     main();

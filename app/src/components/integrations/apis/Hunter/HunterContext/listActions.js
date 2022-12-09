@@ -20,3 +20,14 @@ export const createLeadSuccess = (Lead) => ({
 export const createLeadFailure = () => ({
   type: "CREATE_LEAD_FAILURE",
 });
+export const deleteLeadStart = () => ({
+  type: "DELETE_LEAD_START",
+});
+
+export const deleteLeadSuccess = (id) => ({
+  type: "DELETE_LEAD_SUCCESS",
+  payload: id,
+});
+export const deleteLeadFailure = () => ({
+  type: "DELETE_LEAD_FAILURE",
+});

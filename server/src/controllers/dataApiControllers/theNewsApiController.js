@@ -4,7 +4,7 @@ const NotionApiKey = require("../../models/NotionKey");
 const Apikey = require("../../models/ApiKey");
 const axios = require("axios");
 const NotionTheNewsApiPage = require("../../models/NotionTheNewsApiPage");
-const { Client } = require("@notionhq/client");
+const { Client, APIErrorCode } = require("@notionhq/client");
 const { createError } = require("../../utils/error");
 exports.createCountry = async (req, res, next) => {
   try {
@@ -46,7 +46,7 @@ exports.createNews = async (req, res, next) => {
     const newsBody = {
       title: req.body.title,
       snippet: req.body.snippet,
-      time: new Date(req.body.time),
+      time: req.body.time,
       url: req.body.url,
     };
     const update = {
@@ -78,67 +78,67 @@ exports.createNews = async (req, res, next) => {
     const notion = new Client({
       auth: notionKey,
     });
-    const retrieveDatabase = async () => {
-      const response = await notion.databases.retrieve({
-        database_id: dataBaseId,
-      });
-      if (response === null) {
-        return next(createError(400, "Notion Database not found"));
-      }
-    };
-    retrieveDatabase();
 
     const main = async () => {
-      const response = await notion.pages.create({
-        parent: {
-          database_id: dataBaseId,
-        },
-        properties: {
-          Title: {
-            title: [
-              {
-                text: {
-                  content: req.body.title,
-                },
-              },
-            ],
+      try {
+        const response = await notion.pages.create({
+          parent: {
+            database_id: dataBaseId,
           },
+          properties: {
+            Title: {
+              title: [
+                {
+                  text: {
+                    content: req.body.title,
+                  },
+                },
+              ],
+            },
 
-          Snippet: {
-            rich_text: [
-              {
-                text: {
-                  content: req.body.snippet,
+            Snippet: {
+              rich_text: [
+                {
+                  text: {
+                    content: req.body.snippet.slice(0, 1900),
+                  },
                 },
+              ],
+            },
+            Time: {
+              date: {
+                start: req.body.time,
               },
-            ],
-          },
-          Time: {
-            date: {
-              start: req.body.time,
+            },
+            "News URL": {
+              url: req.body.url,
             },
           },
-          "News URL": {
-            url: req.body.url,
-          },
-        },
-      });
-      const body = {
-        title: req.body.title,
-        pageId: response.id,
-      };
-      const update = {
-        $set: { user: req.user.id },
-        $push: { associateIds: body },
-      };
-      const createPage = await NotionTheNewsApiPage.updateOne(
-        { user: req.user.id },
-        update,
-        {
-          upsert: true,
+        });
+        const body = {
+          title: req.body.title,
+          pageId: response.id,
+        };
+        const update = {
+          $set: { user: req.user.id },
+          $push: { associateIds: body },
+        };
+        const createPage = await NotionTheNewsApiPage.updateOne(
+          { user: req.user.id },
+          update,
+          {
+            upsert: true,
+          }
+        );
+        console.log(createPage);
+      } catch (err) {
+        if (err.code === APIErrorCode.ObjectNotFound) {
+          return next(createError(400, "Notion Error"));
+        } else {
+          // Other error handling code
+          return next(createError(400, "Notion Error"));
         }
-      );
-      console.log(createPage);
+      }
     };
 
     main();

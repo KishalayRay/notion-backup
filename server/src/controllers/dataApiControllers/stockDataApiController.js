@@ -33,72 +33,93 @@ exports.createStock = async (req, res, next) => {
     await StockData.updateOne({ stockSymbol: req.body.stockSymbol }, update, {
       upsert: true,
     });
-    // notion update
+
+    const notionCredential = await NotionApiKey.findOne(
+      {
+        $and: [
+          { user: req.user.id },
+          { credentials: { $elemMatch: { apiSlug: "Alphavantage" } } },
+        ],
+      },
+      { credentials: { $elemMatch: { apiSlug: "Alphavantage" } } }
+    );
+    console.log(notionCredential);
+    const dataBaseId = notionCredential.credentials[0].databaseId;
+    const notionKey = notionCredential.credentials[0].apiKey;
 
     const notion = new Client({
-      auth: req.notionKey,
+      auth: notionKey,
     });
 
     const main = async () => {
-      const response = await notion.pages.create({
-        parent: {
-          database_id: req.dataBaseId,
-        },
-        properties: {
-          Stock: {
-            title: [
-              {
-                type: "text",
-                text: {
-                  content: req.body.stockName,
+      try {
+        const response = await notion.pages.create({
+          parent: {
+            database_id: dataBaseId,
+          },
+          properties: {
+            Stock: {
+              title: [
+                {
+                  type: "text",
+                  text: {
+                    content: req.body.stockName,
+                  },
                 },
-              },
-            ],
-          },
-          Symbol: {
-            rich_text: [
-              {
-                type: "text",
-                text: {
-                  content: req.body.stockSymbol,
+              ],
+            },
+            Symbol: {
+              rich_text: [
+                {
+                  type: "text",
+                  text: {
+                    content: req.body.stockSymbol,
+                  },
                 },
-              },
-            ],
+              ],
+            },
+            Price: {
+              number: parseFloat(req.body.stockPrice),
+            },
+            "Day Change": {
+              number: parseFloat(req.body.stockDayChange),
+            },
+            "Change Parcentage": {
+              number: parseFloat(req.body.stockDayChangeParcentage) / 100,
+            },
+            "Todays High": {
+              number: parseFloat(req.body.stockDayHigh),
+            },
+            "Todays Low": {
+              number: parseFloat(req.body.stockDayLow),
+            },
           },
-          Price: {
-            number: parseFloat(req.body.stockPrice),
-          },
-          "Day Change": {
-            number: parseFloat(req.body.stockDayChange),
-          },
-          "Change Parcentage": {
-            number: parseFloat(req.body.stockDayChangeParcentage) / 100,
-          },
-          "Todays High": {
-            number: parseFloat(req.body.stockDayHigh),
-          },
-          "Todays Low": {
-            number: parseFloat(req.body.stockDayLow),
-          },
-        },
-      });
+        });
 
-      const body = {
-        stockSymbol: req.body.stockSymbol,
-        pageId: response.id,
-      };
-      const update = {
-        $set: { user: req.user.id },
-        $push: { associateIds: body },
-      };
-      const createPage = await NotionStockDataPage.updateOne(
-        { user: req.user.id },
-        update,
-        {
-          upsert: true,
+        const body = {
+          stockSymbol: req.body.stockSymbol,
+          pageId: response.id,
+        };
+        const update = {
+          $set: { user: req.user.id },
+          $push: { associateIds: body },
+        };
+        const createPage = await NotionStockDataPage.updateOne(
+          { user: req.user.id },
+          update,
+          {
+            upsert: true,
+          }
+        );
+        console.log(createPage);
+      } catch (err) {
+        if (err.code === APIErrorCode.ObjectNotFound) {
+          return next(createError(400, "Notion Error"));
+        } else {
+          // Other error handling code
+          return next(createError(400, "Notion Error"));
         }
-      );
-      console.log(createPage);
+      }
     };
 
     main();
@@ -348,21 +369,4 @@ exports.pageDetails = async (req, res) => {
       });
     }
   }
-  // individuals.map(async (individual) => {
-  //   const notionCredential = await NotionApiKey.findOne(
-  //     {
-  //       $and: [
-  //         { user: individual.user },
-  //         { "credentials.apiSlug": "Alphavantage" },
-  //       ],
-  //     },
-  //     { credentials: { $elemMatch: { apiSlug: "Alphavantage" } } }
-  //   );
-  //   console.log(notionCredential);
-  //   const notionKey = cryptoJS.AES.decrypt(
-  //     notionCredential.credentials[0].apiKey,
-  //     process.env.SECRET_KEY
-  //   ).toString(cryptoJS.enc.Utf8);
-  //   console.log(notionKey);
-  // });
 };

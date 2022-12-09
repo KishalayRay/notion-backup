@@ -25,6 +25,7 @@ import useAxiosPrivate from "../../../../../hooks/useAxiosPrivate";
 const Omdb = () => {
   const axiosPrivate = useAxiosPrivate();
   const [isDisabled, setIsDisabled] = useState(false);
+
   const { query, searchMovie, movies, addMovie, getApiKey, isLoading } =
     useContext(OmdbContext);
   const { dispatch } = useContext(OmdblistContext);
@@ -94,6 +95,7 @@ const Omdb = () => {
                 <Input
                   pr="4.5rem"
                   type="text"
+                  pattern="^[A-Za-z0-9]+$"
                   placeholder="Search movies or series..."
                   value={queryM}
                   onChange={(e) => {
@@ -151,13 +153,12 @@ const Omdb = () => {
                             colorScheme="purple"
                             size="sm"
                             onClick={() => {
-                              
                               CreateMovie(movie.imdbID, axiosPrivate, dispatch);
                               addMovie(movie.imdbID);
                               setIsDisabled(true);
                               setTimeout(() => {
                                 setIsDisabled(false);
-                              }, 2000);
+                              }, 1000);
                             }}
                           >
                             Add

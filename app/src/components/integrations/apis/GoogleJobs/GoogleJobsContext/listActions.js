@@ -20,3 +20,13 @@ export const createJobsSuccess = (job) => ({
 export const createJobsFailure = () => ({
   type: "CREATE_JOBS_FAILURE",
 });
+export const deleteJobsStart = () => ({
+  type: "DELETE_JOBS_START",
+});
+export const deleteJobsSuccess = (id) => ({
+  type: "DELETE_JOBS_SUCCESS",
+  payload: id,
+});
+export const deleteJobsFailure = () => ({
+  type: "DELETE_JOBS_FAILURE",
+});

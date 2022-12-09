@@ -44,80 +44,98 @@ exports.createCountry = async (req, res, next) => {
 };
 exports.createHoliday = async (req, res, next) => {
   try {
-    const response = await axios.get(
-      `https://calendarific.com/api/v2/holidays?country=${req.body.country}&year=${req.body.year}&api_key=${req.body.apiKey}&month=${req.body.month}`
+    const holidayBody = {
+      name: req.body.name,
+      description: req.body.description,
+      date: req.body.date,
+    };
+    const update = {
+      $set: {
+        country: req.body.country,
+        month: req.body.month,
+        year: req.body.year,
+      },
+      $push: { holidays: holidayBody },
+    };
+    await CalendarificList.updateOne({ country: req.body.country }, update, {
+      upsert: true,
+    });
+    const notionCredential = await NotionApiKey.findOne(
+      {
+        $and: [
+          { user: req.user.id },
+          { credentials: { $elemMatch: { apiSlug: "Calendarific" } } },
+        ],
+      },
+      { credentials: { $elemMatch: { apiSlug: "Calendarific" } } }
     );
-    const holidays = response.data.response.holidays;
-    console.log(holidays);
-    holidays.map(async (holiday) => {
-      const holidayBody = {
-        name: holiday.name,
-        description: holiday.description,
-        date: holiday.date.iso.substring(0, 10),
-      };
-      const update = {
-        $set: {
-          country: req.body.country,
-          month: req.body.month,
-          year: req.body.year,
-        },
-        $push: { holidays: holidayBody },
-      };
-      await CalendarificList.updateOne({ country: req.body.country }, update, {
-        upsert: true,
-      });
-      const notion = new Client({
-        auth: req.notionKey,
-      });
-      const response = await notion.pages.create({
-        parent: {
-          database_id: req.dataBaseId,
-        },
-        properties: {
-          Name: {
-            title: [
-              {
-                text: {
-                  content: holiday.name,
-                },
-              },
-            ],
-          },
+    console.log(notionCredential);
+    const dataBaseId = notionCredential.credentials[0].databaseId;
 
-          Description: {
-            rich_text: [
-              {
-                text: {
-                  content: holiday.description,
-                },
-              },
-            ],
+    const notionKey = notionCredential.credentials[0].apiKey;
+    const notion = new Client({
+      auth: notionKey,
+    });
+    const main = async () => {
+      try {
+        const response = await notion.pages.create({
+          parent: {
+            database_id: dataBaseId,
           },
-          Date: {
-            date: {
-              start: holiday.date.iso.substring(0, 10),
+          properties: {
+            Name: {
+              title: [
+                {
+                  text: {
+                    content: req.body.name,
+                  },
+                },
+              ],
+            },
+
+            Description: {
+              rich_text: [
+                {
+                  text: {
+                    content: req.body.description,
+                  },
+                },
+              ],
+            },
+            Date: {
+              date: {
+                start: req.body.date,
+              },
             },
           },
-        },
-      });
+        });
 
-      const body = {
-        name: holiday.name,
-        pageId: response.id,
-      };
-      const updatePage = {
-        $set: { user: req.user.id },
-        $push: { associateIds: body },
-      };
-      const createPage = await NotionCalendarificPage.updateOne(
-        { user: req.user.id },
-        updatePage,
-        {
-          upsert: true,
+        const body = {
+          name: req.body.name,
+          pageId: response.id,
+        };
+        const updatePage = {
+          $set: { user: req.user.id },
+          $push: { associateIds: body },
+        };
+        const createPage = await NotionCalendarificPage.updateOne(
+          { user: req.user.id },
+          updatePage,
+          {
+            upsert: true,
+          }
+        );
+        console.log(createPage);
+      } catch (err) {
+        if (err.code === APIErrorCode.ObjectNotFound) {
+          return next(createError(400, "Notion Error"));
+        } else {
+          // Other error handling code
+          return next(createError(400, "Notion Error"));
         }
-      );
-      console.log(createPage);
-    });
+      }
+    };
+    main();
 
     res.status(200).json({
       data: {

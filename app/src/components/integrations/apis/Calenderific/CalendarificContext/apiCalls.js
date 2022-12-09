@@ -38,24 +38,23 @@ export const CreateHoliday = async (countryCode, axiosPrivate, dispatch) => {
     );
     const holidays = response.data.response.holidays;
     console.log(holidays);
-    const postData = await axiosPrivate.post(`/calendarific/newholiday`, {
-      country: countryCode,
-      month: currentMonth,
-      year: currentYear,
-      apiKey: apiKey,
-      // name: holiday.name,
-      // description: holiday.description,
-      // date: holiday.date.iso.substring(0, 10),
-    });
-    console.log(postData.data);
     holidays.map(async (holiday) => {
+      const postData = await axiosPrivate.post(`/calendarific/newholiday`, {
+        country: countryCode,
+        month: currentMonth,
+        year: currentYear,
+        name: holiday.name,
+        description: holiday.description,
+        date: holiday.date.iso,
+      });
+      console.log(postData);
       const holidayObject = {
         country: countryCode,
         month: currentMonth,
         year: currentYear,
         name: holiday.name,
         description: holiday.description,
-        date: holiday.date.iso.substring(0, 10),
+        date: holiday.date.iso,
       };
 
       console.log(holidayObject);

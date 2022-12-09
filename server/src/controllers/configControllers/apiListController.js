@@ -30,7 +30,8 @@ exports.getApi = async (req, res, next) => {
     }
     if (subscription.data.length) {
       if (
-        subscription.data[0].plan.nickname === "Pro" &&
+        (subscription.data[0].plan.product === "prod_MthPNds8UrjRW2" ||
+          subscription.data[0].plan.product === "prod_Mth60dJ8t5scsf") &&
         subscription.data[0].status === "active"
       ) {
         return res.status(200).json({

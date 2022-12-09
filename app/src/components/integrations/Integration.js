@@ -22,8 +22,6 @@ const Integration = () => {
     const response = await axiosPrivate.get(`/notionconfig/allauth`);
     console.log(response.data.data);
     return response.data.data;
-    // console.log(response.data.data.NotionApi[0].credentials);
-    // setIntegrations(response.data.data.NotionApi[0].credentials);
   };
 
   const {

@@ -1,6 +1,6 @@
 const hunter = require("../../models/Hunter");
 const NotionApiKey = require("../../models/NotionKey");
-const { Client } = require("@notionhq/client");
+const { Client, APIErrorCode } = require("@notionhq/client");
 const { createError } = require("../../utils/error");
 const Apikey = require("../../models/ApiKey");
 const axios = require("axios");
@@ -69,66 +69,70 @@ exports.createLead = async (req, res, next) => {
     );
     const LeadData = response.data.data.emails;
     LeadData.map(async (lead) => {
-      await notion.pages.create({
-        parent: {
-          database_id: dataBaseId,
-        },
-        properties: {
-          Email: {
-            title: [
-              {
-                text: {
-                  content: lead.value,
+      try {
+        await notion.pages.create({
+          parent: {
+            database_id: dataBaseId,
+          },
+          properties: {
+            Company: {
+              title: [
+                {
+                  text: {
+                    content: response.data.data.domain,
+                  },
                 },
-              },
-            ],
-          },
-          FirstName: {
-            rich_text: [
-              {
-                text: {
-                  content: lead.first_name || "",
+              ],
+            },
+            FirstName: {
+              rich_text: [
+                {
+                  text: {
+                    content: lead.first_name || "",
+                  },
                 },
-              },
-            ],
-          },
-          LastName: {
-            rich_text: [
-              {
-                text: {
-                  content: lead.last_name || "",
+              ],
+            },
+            LastName: {
+              rich_text: [
+                {
+                  text: {
+                    content: lead.last_name || "",
+                  },
                 },
-              },
-            ],
-          },
-          Type: {
-            multi_select: [
-              {
-                name: lead.type || "",
-              },
-            ],
-          },
+              ],
+            },
+            Type: {
+              multi_select: [
+                {
+                  name: lead.type || "",
+                },
+              ],
+            },
 
-          Domain: {
-            rich_text: [
-              {
-                text: {
-                  content: response.data.data.domain || "",
+            Email: {
+              type: "email",
+              email: lead.value || "",
+            },
+            Position: {
+              rich_text: [
+                {
+                  text: {
+                    content: lead.position || "",
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
-          Position: {
-            rich_text: [
-              {
-                text: {
-                  content: lead.position || "",
-                },
-              },
-            ],
-          },
-        },
-      });
+        });
+      } catch (err) {
+        if (err.code === APIErrorCode.ObjectNotFound) {
+          return next(createError(400, "Notion Error"));
+        } else {
+          // Other error handling code
+          return next(createError(400, "Notion Error"));
+        }
+      }
     });
 
     res.status(200).json({

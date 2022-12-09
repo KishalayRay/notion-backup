@@ -31,6 +31,7 @@ export const GetApiKey = async (apiAuth, axiosPrivate, dispatch) => {
     dispatch(getApiAuthSuccess(response.data.data.ApiKey));
   } catch (e) {
     console.log(e);
+
     dispatch(getApiAuthFailure);
   }
 };
@@ -43,6 +44,7 @@ export const DeleteApiKey = async (apiAuth, axiosPrivate, dispatch) => {
     dispatch(deleteApiAuthSuccess());
   } catch (e) {
     console.log(e);
+
     dispatch(deleteApiAuthFailure);
   }
 };

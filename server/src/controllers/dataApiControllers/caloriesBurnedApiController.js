@@ -30,59 +30,81 @@ exports.createActivity = async (req, res, next) => {
         new: true,
       }
     );
+    const notionCredential = await NotionApiKey.findOne(
+      {
+        $and: [
+          { user: req.user.id },
+          { credentials: { $elemMatch: { apiSlug: "Bigpicture" } } },
+        ],
+      },
+      { credentials: { $elemMatch: { apiSlug: "Bigpicture" } } }
+    );
+    console.log(notionCredential);
+    const dataBaseId = notionCredential.credentials[0].databaseId;
+    const notionKey = notionCredential.credentials[0].apiKey;
+    console.log(dataBaseId, notionKey);
 
     const notion = new Client({
-      auth: req.notionKey,
+      auth: notionKey,
     });
 
     const main = async () => {
-      const response = await notion.pages.create({
-        parent: {
-          database_id: req.dataBaseId,
-        },
-        properties: {
-          Activity: {
-            title: [
-              {
-                text: {
-                  content: req.body.name,
+      try {
+        const response = await notion.pages.create({
+          parent: {
+            database_id: dataBaseId,
+          },
+          properties: {
+            Activity: {
+              title: [
+                {
+                  text: {
+                    content: req.body.name,
+                  },
                 },
-              },
-            ],
-          },
+              ],
+            },
 
-          "Calories Per Hour": {
-            number: req.body.cph,
-          },
-          Duration: {
-            number: req.body.duration,
-          },
-          Burned: {
-            number: req.body.burned,
-          },
-          Date: {
-            date: {
-              start: currDate,
+            "Calories Per Hour": {
+              number: req.body.cph,
+            },
+            Duration: {
+              number: req.body.duration,
+            },
+            Burned: {
+              number: req.body.burned,
+            },
+            Date: {
+              date: {
+                start: currDate,
+              },
             },
           },
-        },
-      });
-      const body = {
-        name: req.body.activityId,
-        pageId: response.id,
-      };
-      const update = {
-        $set: { user: req.user.id },
-        $push: { associateIds: body },
-      };
-      const createPage = await NotionCaloriesPage.updateOne(
-        { user: req.user.id },
-        update,
-        {
-          upsert: true,
+        });
+        const body = {
+          name: req.body.activityId,
+          pageId: response.id,
+        };
+        const update = {
+          $set: { user: req.user.id },
+          $push: { associateIds: body },
+        };
+        const createPage = await NotionCaloriesPage.updateOne(
+          { user: req.user.id },
+          update,
+          {
+            upsert: true,
+          }
+        );
+        console.log(createPage);
+      } catch (err) {
+        if (err.code === APIErrorCode.ObjectNotFound) {
+          return next(createError(400, "Notion Error"));
+        } else {
+          // Other error handling code
+          return next(createError(400, "Notion Error"));
         }
-      );
-      console.log(createPage);
+      }
     };
 
     main();

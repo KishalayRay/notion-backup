@@ -9,10 +9,9 @@ const {
   pageDetails,
   createNextHoliday,
 } = require("../../controllers/dataApiControllers/caledarificApiController");
-const calendarificMiddleware = require("../../middlewares/dataApiMiddlewares/calendarificMiddleware");
 
 router.post("/country", verify, createCountry);
-router.post("/newholiday", verify, calendarificMiddleware, createHoliday);
+router.post("/newholiday", verify, createHoliday);
 router.get("/holiday", verify, getHoliday);
 router.get("/", updateHoliday);
 router.get("/page", pageDetails);

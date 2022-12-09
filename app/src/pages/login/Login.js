@@ -15,7 +15,7 @@ import {
   AlertIcon,
 } from "@chakra-ui/react";
 import { useState, useContext } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation, redirect } from "react-router-dom";
 
 //import { LoginUser } from "../../context/authContext/apiCalls";
 //import { AuthContext } from "../../context/authContext/AuthContext";
@@ -38,15 +38,17 @@ const Login = () => {
         email: email,
         password: password,
       });
-      localStorage.setItem("userEmail", email);
+
+      window.localStorage.setItem("userEmail", true);
       setAuth({
         isAdmin: response.data.data.user.isAdmin,
         accessToken: response.data.data.accessToken,
       });
+
       navigate(from, { replace: true });
     } catch (e) {
       console.log(e);
-      // setAuth({ message: "failed" });
+      setAuth({ message: "failed" });
     }
     setLoad(false);
   };

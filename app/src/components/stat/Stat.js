@@ -48,7 +48,9 @@ const Stats = () => {
           />
           <StatsCard
             title={"Active Since:"}
-            stat={`${stat.active !== 0 ? stat.active.age : 0} month`}
+            stat={`${
+              stat.active !== 0 ? Math.floor(stat.active.age) : 0
+            } month`}
           />
         </SimpleGrid>
       </Container>

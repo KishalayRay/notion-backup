@@ -33,70 +33,91 @@ exports.createCoin = async (req, res, next) => {
       upsert: true,
     });
 
+    const notionCredential = await NotionApiKey.findOne(
+      {
+        $and: [
+          { user: req.user.id },
+          { credentials: { $elemMatch: { apiSlug: "Coinranking" } } },
+        ],
+      },
+      { credentials: { $elemMatch: { apiSlug: "Coinranking" } } }
+    );
+    console.log(notionCredential);
+    const dataBaseId = notionCredential.credentials[0].databaseId;
+
+    const notionKey = notionCredential.credentials[0].apiKey;
     const notion = new Client({
-      auth: req.notionKey,
+      auth: notionKey,
     });
-
     const main = async () => {
-      const response = await notion.pages.create({
-        parent: {
-          database_id: req.dataBaseId,
-        },
-        properties: {
-          Coin: {
-            title: [
-              {
-                type: "text",
-                text: {
-                  content: req.body.coinName,
+      try {
+        const response = await notion.pages.create({
+          parent: {
+            database_id: dataBaseId,
+          },
+          properties: {
+            Coin: {
+              title: [
+                {
+                  type: "text",
+                  text: {
+                    content: req.body.coinName,
+                  },
                 },
-              },
-            ],
-          },
-          Symbol: {
-            rich_text: [
-              {
-                type: "text",
-                text: {
-                  content: req.body.coinSymbol,
+              ],
+            },
+            Symbol: {
+              rich_text: [
+                {
+                  type: "text",
+                  text: {
+                    content: req.body.coinSymbol,
+                  },
                 },
-              },
-            ],
+              ],
+            },
+            Price: {
+              number: parseFloat(req.body.coinPrice),
+            },
+            "Day Change": {
+              number: parseFloat(req.body.coinDayChange) / 100,
+            },
+            "Market Cap": {
+              number: parseFloat(req.body.coinMarketCap),
+            },
+            "Circulating Supply": {
+              number: parseFloat(req.body.coinCirculation),
+            },
+            Rank: {
+              number: parseFloat(req.body.coinRank),
+            },
           },
-          Price: {
-            number: parseFloat(req.body.coinPrice),
-          },
-          "Day Change": {
-            number: parseFloat(req.body.coinDayChange) / 100,
-          },
-          "Market Cap": {
-            number: parseFloat(req.body.coinMarketCap),
-          },
-          "Circulating Supply": {
-            number: parseFloat(req.body.coinCirculation),
-          },
-          Rank: {
-            number: parseFloat(req.body.coinRank),
-          },
-        },
-      });
+        });
 
-      const body = {
-        coinSymbol: req.body.coinSymbol,
-        pageId: response.id,
-      };
-      const update = {
-        $set: { user: req.user.id },
-        $push: { associateIds: body },
-      };
-      const createPage = await NotionCoinDataPage.updateOne(
-        { user: req.user.id },
-        update,
-        {
-          upsert: true,
+        const body = {
+          coinSymbol: req.body.coinSymbol,
+          pageId: response.id,
+        };
+        const update = {
+          $set: { user: req.user.id },
+          $push: { associateIds: body },
+        };
+        const createPage = await NotionCoinDataPage.updateOne(
+          { user: req.user.id },
+          update,
+          {
+            upsert: true,
+          }
+        );
+        console.log(createPage);
+      } catch (e) {
+        if (err.code === APIErrorCode.ObjectNotFound) {
+          return next(createError(400, "Notion Error"));
+        } else {
+          // Other error handling code
+          return next(createError(400, "Notion Error"));
         }
-      );
-      console.log(createPage);
+      }
     };
 
     main();

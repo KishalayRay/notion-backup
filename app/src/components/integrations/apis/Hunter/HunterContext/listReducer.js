@@ -36,6 +36,27 @@ const HunterReducer = (state, action) => {
         isFetching: false,
         error: true,
       };
+    case "DELETE_LEAD_START":
+      return {
+        ...state,
+        isFetching: true,
+        error: false,
+      };
+    case "DELETE_LEAD_SUCCESS":
+      return {
+        leads: state.leads.filter((lead) => {
+          return lead._id !== action.payload;
+        }),
+        isFetching: false,
+        error: false,
+      };
+    case "DELETE_LEAD_FAILURE":
+      return {
+        ...state,
+        isFetching: false,
+        error: true,
+      };
+
     default: {
       return {
         ...state,

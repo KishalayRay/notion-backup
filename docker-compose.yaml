@@ -1,6 +1,7 @@
 version: "3.8"
 services:
   backend_api:
+    image: microdockr13/notionapp-backend_api
     restart: always
     build: ./server
     container_name: backend_api

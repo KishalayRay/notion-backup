@@ -6,9 +6,8 @@ const {
   getOmdbs,
   deleteOmdb,
 } = require("../../controllers/dataApiControllers/omdbApiController");
-const omdbMiddleware = require("../../middlewares/dataApiMiddlewares/omdbMiddleware");
 
-router.post("/newomdb", verify, omdbMiddleware, createOmdb);
+router.post("/newomdb", verify, createOmdb);
 router.get("/omdbs", verify, getOmdbs);
 router.put("/:id", verify, deleteOmdb);
 module.exports = router;

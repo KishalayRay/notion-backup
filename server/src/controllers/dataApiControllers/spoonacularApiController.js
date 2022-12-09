@@ -17,12 +17,10 @@ exports.createRecipe = async (req, res, next) => {
         recipeId: req.body.recipeId,
         recipeImage: req.body.recipeImage,
         recipeName: req.body.recipeName,
-        recipeIngredients: req.body.recipeIngredients,
         fat: parseFloat(req.body.fat),
         carb: parseFloat(req.body.carb),
         calories: parseFloat(req.body.calories),
         protein: parseFloat(req.body.protein),
-        instructions: req.body.instructions.replace(/(<([^>]+)>)/gi, ""),
       },
       $push: { users: req.user.id },
     };
@@ -36,84 +34,109 @@ exports.createRecipe = async (req, res, next) => {
     );
 
     // notion update
+    const notionCredential = await NotionApiKey.findOne(
+      {
+        $and: [
+          { user: req.user.id },
+          { credentials: { $elemMatch: { apiSlug: "Spoonacular" } } },
+        ],
+      },
+      { credentials: { $elemMatch: { apiSlug: "Spoonacular" } } }
+    );
+    console.log(notionCredential);
+    const dataBaseId = notionCredential.credentials[0].databaseId;
+    const notionKey = notionCredential.credentials[0].apiKey;
 
     const notion = new Client({
-      auth: req.notionKey,
+      auth: notionKey,
     });
 
     const main = async () => {
-      const response = await notion.pages.create({
-        parent: {
-          database_id: req.dataBaseId,
-        },
-        properties: {
-          Meal: {
-            title: [
-              {
-                text: {
-                  content: req.body.recipeName,
+      try {
+        const response = await notion.pages.create({
+          parent: {
+            database_id: dataBaseId,
+          },
+          properties: {
+            Meal: {
+              title: [
+                {
+                  text: {
+                    content: req.body.recipeName,
+                  },
                 },
-              },
-            ],
-          },
-          Image: {
-            files: [
-              {
-                type: "external",
-                name: "meal cover",
-                external: {
-                  url: req.body.recipeImage || "",
+              ],
+            },
+            Image: {
+              files: [
+                {
+                  type: "external",
+                  name: "meal cover",
+                  external: {
+                    url:
+                      req.body.recipeImage ||
+                      "https://img.freepik.com/free-vector/broken-oatmeal-cookies-set-traditional-american-biscuit-with-chocolate-crunches-isolated-white-illustration-home-baked-food-recipe-snacks-concept_74855-14297.jpg?w=2000",
+                  },
                 },
-              },
-            ],
-          },
-          Ingredients: {
-            multi_select: req.body.recipeIngredients.map((ingredient) => {
-              return {
-                name: ingredient,
-              };
-            }),
-          },
-          "Fat (g)": {
-            number: parseFloat(req.body.fat),
-          },
-          "Carbs (g)": {
-            number: parseFloat(req.body.carb),
-          },
-          "Calories (k)": {
-            number: parseFloat(req.body.calories),
-          },
-          "Protein (g)": {
-            number: parseFloat(req.body.protein),
-          },
-          Instructions: {
-            rich_text: [
-              {
-                type: "text",
-                text: {
-                  content: req.body.instructions.replace(/(<([^>]+)>)/gi, ""),
+              ],
+            },
+            Ingredients: {
+              multi_select: req.body.recipeIngredients.map((ingredient) => {
+                return {
+                  name: ingredient,
+                };
+              }),
+            },
+            "Fat (g)": {
+              number: parseFloat(req.body.fat) || 0,
+            },
+            "Carbs (g)": {
+              number: parseFloat(req.body.carb) || 0,
+            },
+            "Calories (k)": {
+              number: parseFloat(req.body.calories) || 0,
+            },
+            "Protein (g)": {
+              number: parseFloat(req.body.protein) || 0,
+            },
+            Instructions: {
+              rich_text: [
+                {
+                  type: "text",
+                  text: {
+                    content:
+                      req.body.instructions.replace(/(<([^>]+)>)/gi, "") ||
+                      "no instructions",
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
-        },
-      });
-      const body = {
-        recipeId: req.body.recipeId,
-        pageId: response.id,
-      };
-      const update = {
-        $set: { user: req.user.id },
-        $push: { associateIds: body },
-      };
-      const createPage = await NotionSpoonacularPage.updateOne(
-        { user: req.user.id },
-        update,
-        {
-          upsert: true,
+        });
+        const body = {
+          recipeId: req.body.recipeId,
+          pageId: response.id,
+        };
+        const update = {
+          $set: { user: req.user.id },
+          $push: { associateIds: body },
+        };
+        const createPage = await NotionSpoonacularPage.updateOne(
+          { user: req.user.id },
+          update,
+          {
+            upsert: true,
+          }
+        );
+        console.log(createPage);
+      } catch (err) {
+        if (err.code === APIErrorCode.ObjectNotFound) {
+          return next(createError(400, "Notion Error"));
+        } else {
+          // Other error handling code
+          return next(createError(400, "Notion Error"));
         }
-      );
-      console.log(createPage);
+      }
     };
 
     main();
@@ -128,10 +151,11 @@ exports.createRecipe = async (req, res, next) => {
   }
 };
 exports.getRecipes = async (req, res, next) => {
+  const userId = req.user.id;
   const page = req.query.page * 1 || 1;
   const limit = 6;
   const skip = (page - 1) * limit;
-  const numRecipes = await Spoonacular.countDocuments();
+  const numRecipes = await Spoonacular.find({ users: userId }).countDocuments();
   const pageCount = Math.ceil(numRecipes / limit);
   if (req.query.page) {
     if (skip > numRecipes) {
@@ -140,7 +164,7 @@ exports.getRecipes = async (req, res, next) => {
       );
     }
   }
-  const userId = req.user.id;
+
   try {
     const recipes = await Spoonacular.find({ users: userId })
       .skip(skip)

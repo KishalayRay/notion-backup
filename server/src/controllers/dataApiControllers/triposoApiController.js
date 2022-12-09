@@ -1,6 +1,6 @@
 const Triposo = require("../../models/Triposo");
 const NotionApiKey = require("../../models/NotionKey");
-const { Client } = require("@notionhq/client");
+const { Client, APIErrorCode } = require("@notionhq/client");
 const { createError } = require("../../utils/error");
 const Apikey = require("../../models/ApiKey");
 const axios = require("axios");
@@ -44,15 +44,7 @@ exports.createTriposo = async (req, res, next) => {
     const notion = new Client({
       auth: notionKey,
     });
-    const retrieveDatabase = async () => {
-      const response = await notion.databases.retrieve({
-        database_id: dataBaseId,
-      });
-      if (response === null) {
-        return next(createError(400, "Notion Database not found"));
-      }
-    };
-    retrieveDatabase();
+
     const apikey = await Apikey.findOne(
       {
         $and: [
@@ -74,51 +66,53 @@ exports.createTriposo = async (req, res, next) => {
     );
     const tripData = response.data.results;
     tripData.map(async (trip) => {
-      await notion.pages.create({
-        parent: {
-          database_id: dataBaseId,
-        },
-        properties: {
-          Attraction: {
-            title: [
-              {
-                text: {
-                  content: trip.name || "",
-                },
-              },
-            ],
+      try {
+        await notion.pages.create({
+          parent: {
+            database_id: dataBaseId,
           },
-          Description: {
-            rich_text: [
-              {
-                text: {
-                  content: trip.snippet || "",
+          properties: {
+            Attraction: {
+              title: [
+                {
+                  text: {
+                    content: trip.name || "",
+                  },
                 },
-              },
-            ],
-          },
-          City: {
-            rich_text: [
-              {
-                text: {
-                  content: trip.location_id || "",
+              ],
+            },
+            Description: {
+              rich_text: [
+                {
+                  text: {
+                    content: trip.snippet || "",
+                  },
                 },
-              },
-            ],
-          },
-          // Tags: {
-          //   multi_select: trip.tag_labels.map((tag) => {
-          //     return {
-          //       name: tag,
-          //     };
-          //   }),
-          // },
+              ],
+            },
+            City: {
+              rich_text: [
+                {
+                  text: {
+                    content: trip.location_id || "",
+                  },
+                },
+              ],
+            },
 
-          Rating: {
-            number: trip.score || 0,
+            Rating: {
+              number: trip.score.toFixed(2) || 0,
+            },
           },
-        },
-      });
+        });
+      } catch (err) {
+        if (err.code === APIErrorCode.ObjectNotFound) {
+          return next(createError(400, "Notion Error"));
+        } else {
+          // Other error handling code
+          return next(createError(400, "Notion Error"));
+        }
+      }
     });
 
     res.status(200).json({

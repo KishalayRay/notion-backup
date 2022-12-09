@@ -13,10 +13,7 @@ const spoonacularSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    recipeIngredients: {
-      type: Array,
-      required: true,
-    },
+
     carb: {
       type: Number,
       required: true,
@@ -33,11 +30,6 @@ const spoonacularSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    instructions: {
-      type: String,
-      required: true,
-    },
-
     users: [
       {
         type: mongoose.SchemaTypes.ObjectId,

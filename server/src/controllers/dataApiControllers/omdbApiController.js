@@ -2,7 +2,7 @@ const Omdb = require("../../models/Omdb");
 const cryptoJS = require("crypto-js");
 const NotionApiKey = require("../../models/NotionKey");
 const NotionOmdbPage = require("../../models/NotionOmdbPage");
-const { Client } = require("@notionhq/client");
+const { Client, APIErrorCode } = require("@notionhq/client");
 const { createError } = require("../../utils/error");
 exports.createOmdb = async (req, res, next) => {
   try {
@@ -29,16 +29,28 @@ exports.createOmdb = async (req, res, next) => {
     await Omdb.updateOne({ movieId: req.body.movieId }, update, {
       upsert: true,
     });
+    const notionCredential = await NotionApiKey.findOne(
+      {
+        $and: [
+          { user: req.user.id },
+          { credentials: { $elemMatch: { apiSlug: "Omdb" } } },
+        ],
+      },
+      { credentials: { $elemMatch: { apiSlug: "Omdb" } } }
+    );
+    console.log(notionCredential);
+    const dataBaseId = notionCredential.credentials[0].databaseId;
+    const notionKey = notionCredential.credentials[0].apiKey;
 
     const notion = new Client({
-      auth: req.notionKey,
+      auth: notionKey,
     });
 
     const main = async () => {
       try {
         const response = await notion.pages.create({
           parent: {
-            database_id: req.dataBaseId,
+            database_id: dataBaseId,
           },
           properties: {
             Title: {
@@ -56,7 +68,7 @@ exports.createOmdb = async (req, res, next) => {
                   type: "external",
                   name: "movie image",
                   external: {
-                    url: req.body.movieImage,
+                    url: req.body.movieImage || "",
                   },
                 },
               ],
@@ -67,6 +79,26 @@ exports.createOmdb = async (req, res, next) => {
                   name: genre,
                 };
               }),
+            },
+            Plot: {
+              rich_text: [
+                {
+                  type: "text",
+                  text: {
+                    content: req.body.moviePlot || "no content",
+                  },
+                },
+              ],
+            },
+            Actors: {
+              rich_text: [
+                {
+                  type: "text",
+                  text: {
+                    content: req.body.movieActors || "no content",
+                  },
+                },
+              ],
             },
             "Duration (min)": {
               number: req.body.movieDuration || 0,
@@ -97,7 +129,12 @@ exports.createOmdb = async (req, res, next) => {
         );
         console.log(createPage);
       } catch (err) {
-        return next(createError(400, "Notion Error"));
+        if (err.code === APIErrorCode.ObjectNotFound) {
+          return next(createError(400, "Notion Error"));
+        } else {
+          // Other error handling code
+          return next(createError(400, "Notion Error"));
+        }
       }
     };
     main();
@@ -204,7 +241,7 @@ exports.deleteOmdb = async (req, res, next) => {
     console.log(deletePage, "Notion Page");
     const emptyDB = await Omdb.findById({
       _id: req.params.id,
-      users: { $size: 0 },
+      users: [],
     });
     if (emptyDB) {
       await Omdb.findByIdAndDelete(req.params.id);

@@ -52,14 +52,7 @@ exports.createJob = async (req, res, next) => {
     const notion = new Client({
       auth: notionKey,
     });
-    const retrieveDatabase = async () => {
-      const response = await notion.databases.retrieve({
-        database_id: dataBaseId,
-      });
-      if (response === null) {
-        return next(createError(400, "Notion Database not found"));
-      }
-    };
+
     retrieveDatabase();
     const apikey = await Apikey.findOne(
       {
@@ -81,71 +74,75 @@ exports.createJob = async (req, res, next) => {
       hl: "en",
     };
 
-    // const callback = function (data) {
-    //   console.log(data["jobs_results"]);
-    // };
-
-    // Show result as JSON
     search.json(params, (data) => {
       const jobsArray = data["jobs_results"];
       console.log(jobsArray);
       jobsArray.map(async (job) => {
-        await notion.pages.create({
-          parent: {
-            database_id: dataBaseId,
-          },
-          properties: {
-            Title: {
-              title: [
-                {
-                  text: {
-                    content: job.title,
-                  },
-                },
-              ],
+        try {
+          await notion.pages.create({
+            parent: {
+              database_id: dataBaseId,
             },
-            Company: {
-              rich_text: [
-                {
-                  text: {
-                    content: job.company_name,
+            properties: {
+              Title: {
+                title: [
+                  {
+                    text: {
+                      content: job.title,
+                    },
                   },
-                },
-              ],
-            },
-            Location: {
-              rich_text: [
-                {
-                  text: {
-                    content: job.location,
+                ],
+              },
+              Company: {
+                rich_text: [
+                  {
+                    text: {
+                      content: job.company_name,
+                    },
                   },
-                },
-              ],
-            },
-            Aggregator: {
-              rich_text: [
-                {
-                  text: {
-                    content: job.via,
+                ],
+              },
+              Location: {
+                rich_text: [
+                  {
+                    text: {
+                      content: job.location,
+                    },
                   },
-                },
-              ],
-            },
+                ],
+              },
+              Aggregator: {
+                rich_text: [
+                  {
+                    text: {
+                      content: job.via,
+                    },
+                  },
+                ],
+              },
 
-            Extensions: {
-              multi_select: job.extensions.map((extension) => {
-                return {
-                  name: extension,
-                };
-              }),
-            },
-            Date: {
-              date: {
-                start: currDate,
+              Extensions: {
+                multi_select: job.extensions.map((extension) => {
+                  return {
+                    name: extension,
+                  };
+                }),
+              },
+              Date: {
+                date: {
+                  start: currDate,
+                },
               },
             },
-          },
-        });
+          });
+        } catch (error) {
+          if (err.code === APIErrorCode.ObjectNotFound) {
+            return next(createError(400, "Notion Error"));
+          } else {
+            // Other error handling code
+            return next(createError(400, "Notion Error"));
+          }
+        }
       });
     });
 

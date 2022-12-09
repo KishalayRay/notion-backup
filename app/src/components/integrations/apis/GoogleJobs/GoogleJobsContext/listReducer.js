@@ -36,6 +36,28 @@ const GoogleJobsReducer = (state, action) => {
         isFetching: false,
         error: true,
       };
+    case "DELETE_JOBS_START":
+      return {
+        ...state,
+        isFetching: true,
+        error: false,
+      };
+    case "DELETE_JOBS_SUCCESS":
+      return {
+        jobs: state.jobs.filter((job) => {
+          return job._id !== action.payload;
+        }),
+        isFetching: false,
+        error: false,
+      };
+    case "DELETE_JOBS_FAILURE":
+      return {
+        ...state,
+        isFetching: false,
+
+        error: true,
+      };
+
     default: {
       return {
         ...state,

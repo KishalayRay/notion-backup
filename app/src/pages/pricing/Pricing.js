@@ -36,19 +36,20 @@ const Pricing = () => {
   };
   const fetchSubscription = async () => {
     const response = await axiosPrivate.get(`/subs/subscription`);
-    if (!response.data.data.subscription.data.length) {
-      setSubscription("Free");
-    }
-    if (response.data.data.subscription.data.length) {
-      if (
-        response.data.data.subscription.data[0].plan.nickname === "Pro" &&
-        response.data.data.subscription.data[0].status === "active"
-      ) {
-        setSubscription(response.data.data.subscription.data[0].plan.nickname);
-      } else {
-        setSubscription("Free");
-      }
-    }
+    setSubscription(response.data.data.subscription);
+    // if (!response.data.data.subscription.data.length) {
+    //   setSubscription("Free");
+    // }
+    // if (response.data.data.subscription.data.length) {
+    //   if (
+    //     response.data.data.subscription.data[0].plan.nickname === "Pro" &&
+    //     response.data.data.subscription.data[0].status === "active"
+    //   ) {
+    //     setSubscription(response.data.data.subscription.data[0].plan.nickname);
+    //   } else {
+    //     setSubscription("Free");
+    //   }
+    // }
   };
   const createSession = async (priceId) => {
     console.log(priceId);

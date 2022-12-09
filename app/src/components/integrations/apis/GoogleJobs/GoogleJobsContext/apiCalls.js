@@ -7,6 +7,9 @@ import {
   createJobsStart,
   createJobsSuccess,
   createJobsFailure,
+  deleteJobsStart,
+  deleteJobsSuccess,
+  deleteJobsFailure,
 } from "./listActions";
 export const GetJobs = async (axiosPrivate, dispatch) => {
   dispatch(getJobsStart);
@@ -43,5 +46,15 @@ export const CreateJob = async (query, location, axiosPrivate, dispatch) => {
     dispatch(createJobsFailure);
   }
 };
+export const DeleteJob = async (id, axiosPrivate, dispatch) => {
+  dispatch(deleteJobsStart);
 
-//};
+  try {
+    await axiosPrivate.put(`/googlejobs/${id}`, {});
+
+    dispatch(deleteJobsSuccess(id));
+  } catch (e) {
+    console.log(e);
+    dispatch(deleteJobsFailure);
+  }
+};

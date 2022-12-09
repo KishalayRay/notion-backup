@@ -14,19 +14,32 @@ exports.getStats = async (req, res, next) => {
       { $match: { user: new mongoose.Types.ObjectId(req.user.id) } },
       { $project: { total: { $size: "$credentials" } } },
     ]);
-
     const active = await User.aggregate([
       {
         $project: {
           age: {
             $divide: [
-              { $subtract: [new Date(), "$createdAt"] },
-              365 * 24 * 60 * 60 * 10000,
+              {
+                $subtract: [new Date(), "$createdAt"],
+              },
+              1000 * 60 * 60 * 24 * 30, // number of milliseconds in a month
             ],
           },
         },
       },
     ]);
+    // const active = await User.aggregate([
+    //   {
+    //     $project: {
+    //       age: {
+    //         $divide: [
+    //           { $subtract: [new Date(), "$createdAt"] },
+    //           365 * 24 * 60 * 60 * 10000,
+    //         ],
+    //       },
+    //     },
+    //   },
+    // ]);
 
     res.status(200).json({
       data: {

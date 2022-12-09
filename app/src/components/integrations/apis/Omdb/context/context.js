@@ -1,6 +1,4 @@
 import { useEffect, createContext, useReducer } from "react";
-
-import cryptoJS from "crypto-js";
 import axios from "axios";
 import Reducer from "./reducer";
 //b3b93acc
@@ -18,12 +16,7 @@ export const OmdbContextProvider = ({ children }) => {
 
   const fetachAPI = async (api) => {
     dispatch("SET_LOADING");
-    //let cancelToken;
-    // if (typeof cancelToken !== typeof undefined) {
-    //   cancelToken.cancel("Operation canceled by the user.");
-    // }
-    // cancelToken = axios.CancelToken.source();
-    //{ cancelToken: cancelToken.token }
+
     try {
       const response = await axios.get(api);
       const data = await response.data;

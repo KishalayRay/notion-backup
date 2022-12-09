@@ -24,7 +24,7 @@ import useAxiosPrivate from "../../../../hooks/useAxiosPrivate";
 
 import { GoogleJobsContext } from "./GoogleJobsContext/listContext";
 import { DeleteIcon } from "@chakra-ui/icons";
-import { GetJobs, CreateJob } from "./GoogleJobsContext/apiCalls";
+import { GetJobs, CreateJob, DeleteJob } from "./GoogleJobsContext/apiCalls";
 
 const GoogleJobs = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -32,6 +32,13 @@ const GoogleJobs = () => {
   const [jobquery, setJobquery] = useState("");
   const [joblocation, setJoblocation] = useState("");
   const [load, setLoad] = useState(false);
+  const [loadD, setLoadD] = useState(false);
+  const handleDelete = async (id) => {
+    setLoadD(true);
+    console.log(id);
+    await DeleteJob(id, axiosPrivate, dispatch);
+    setLoadD(false);
+  };
   useEffect(() => {
     GetJobs(axiosPrivate, dispatch);
   }, [dispatch]);
@@ -147,7 +154,11 @@ const GoogleJobs = () => {
                       <Td>{job.jobLocation}</Td>
                       <Td>{job.date.substring(0, 10)}</Td>
                       <Td>
-                        <Button size="sm">
+                        <Button
+                          size="sm"
+                          isLoading={loadD ? true : false}
+                          onClick={() => handleDelete(job._id)}
+                        >
                           {" "}
                           <DeleteIcon />
                         </Button>

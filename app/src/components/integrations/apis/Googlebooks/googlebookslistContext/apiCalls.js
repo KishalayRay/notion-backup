@@ -41,18 +41,22 @@ export const CreateBook = async (bookId, axiosPrivate, dispatch) => {
     const bookObject = {
       bookId: book.id,
       bookTitle: book.volumeInfo.title,
+      bookSubtitle: book.volumeInfo.subtitle,
       bookCover: book.volumeInfo.imageLinks.smallThumbnail,
-      bookCategory: book.volumeInfo.categories[0],
+      bookCategory: book.volumeInfo.categories[0].split(/[&/]+/),
       bookAuthor: book.volumeInfo.authors[0],
+      bookDescription: book.volumeInfo.description,
       bookPage: book.volumeInfo.pageCount,
     };
 
     const postData = await axiosPrivate.post(`/googlebooks/newbook`, {
       bookId: book.id,
       bookTitle: book.volumeInfo.title,
+      bookSubtitle: book.volumeInfo.subtitle,
       bookCover: book.volumeInfo.imageLinks.smallThumbnail,
-      bookCategory: book.volumeInfo.categories[0],
+      bookCategory: book.volumeInfo.categories[0].split(/[&/]+/),
       bookAuthor: book.volumeInfo.authors[0],
+      bookDescription: book.volumeInfo.description,
       bookPage: book.volumeInfo.pageCount,
     });
     console.log(postData.data);

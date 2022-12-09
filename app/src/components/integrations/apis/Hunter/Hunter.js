@@ -20,28 +20,27 @@ import {
   Text,
   Select,
 } from "@chakra-ui/react";
+import { Link } from "react-router-dom";
 import useAxiosPrivate from "../../../../hooks/useAxiosPrivate";
 
-import { HunterContext } from "./HunterContext/listContext";
-import { DeleteIcon } from "@chakra-ui/icons";
-import { GetLeads, CreateLead } from "./HunterContext/apiCalls";
+import { HunterlistContext } from "./HunterContext/listContext";
+import { DeleteIcon, RepeatIcon } from "@chakra-ui/icons";
+import { GetLeads, DeleteLead } from "./HunterContext/apiCalls";
 
 const Hunter = () => {
   const axiosPrivate = useAxiosPrivate();
-  const { dispatch, leads } = useContext(HunterContext);
+  const { dispatch, leads } = useContext(HunterlistContext);
   const [domain, setDomain] = useState("");
   const [load, setLoad] = useState(false);
+  const handleDelete = async (id) => {
+    setLoad(true);
+    console.log(id);
+    await DeleteLead(id, axiosPrivate, dispatch);
+    setLoad(false);
+  };
   useEffect(() => {
     GetLeads(axiosPrivate, dispatch);
   }, [dispatch]);
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoad(true);
-    console.log();
-    await CreateLead(domain, axiosPrivate, dispatch);
-    setDomain("");
-    setLoad(false);
-  };
 
   return (
     <Stack>
@@ -56,35 +55,24 @@ const Hunter = () => {
           p={6}
           overflow={"hidden"}
         >
-          <center>
-            <Stack direction={"row"} spacing={3} pl={14}>
-              <Text
-                fontSize={"2xl"}
-                fontWeight={500}
-                fontFamily={"body"}
-                pb={3}
-              >
-                Company Domain
-              </Text>
-              <Input
-                pl={3}
-                width="auto"
-                type="text"
-                onChange={(e) => setDomain(e.target.value)}
-                placeholder="airbnb.com"
-                required
-              />
-              <Button
-                colorScheme="gray"
-                size="md"
-                loadingText="Submitting"
-                isLoading={load ? true : false}
-                onClick={handleSubmit}
-              >
-                Submit
-              </Button>
-            </Stack>
-          </center>
+          <Stack>
+            <center>
+              <Link to="/integrations/Hunter/apiImport">
+                <Center>
+                  <Button
+                    w={"full"}
+                    maxW={"sm"}
+                    color={"grey.400"}
+                    rightIcon={<RepeatIcon />}
+                  >
+                    <Center>
+                      <h3>Import Data</h3>
+                    </Center>
+                  </Button>
+                </Center>
+              </Link>
+            </center>
+          </Stack>
         </Box>
       </Center>
       <Center py={6}>
@@ -124,7 +112,11 @@ const Hunter = () => {
                       <Td>{lead.domain}</Td>
                       <Td>{lead.date.substring(0, 10)}</Td>
                       <Td>
-                        <Button size="sm">
+                        <Button
+                          size="sm"
+                          isLoading={load ? true : false}
+                          onClick={() => handleDelete(lead._id)}
+                        >
                           {" "}
                           <DeleteIcon />
                         </Button>

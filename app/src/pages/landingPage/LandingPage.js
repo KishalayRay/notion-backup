@@ -9,6 +9,7 @@ import useAuth from "../../hooks/useAuth";
 const LandingPage = () => {
   return (
     <>
+      {JSON.stringify(localStorage.getItem("userEmail"))}
       <Navbar />
       <Hero />
       <SecondaryHero />

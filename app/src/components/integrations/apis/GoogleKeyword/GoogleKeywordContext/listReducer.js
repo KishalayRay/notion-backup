@@ -36,6 +36,26 @@ const GoogleKeywordReducer = (state, action) => {
         isFetching: false,
         error: true,
       };
+    case "DELETE_KEYWORD_START":
+      return {
+        ...state,
+        isFetching: true,
+        error: false,
+      };
+    case "DELETE_KEYWORD_SUCCESS":
+      return {
+        keywords: state.keywords.filter((keyword) => {
+          return keyword._id !== action.payload;
+        }),
+        isFetching: false,
+        error: false,
+      };
+    case "DELETE_KEYWORD_FAILURE":
+      return {
+        ...state,
+        isFetching: false,
+        error: true,
+      };
     default: {
       return {
         ...state,

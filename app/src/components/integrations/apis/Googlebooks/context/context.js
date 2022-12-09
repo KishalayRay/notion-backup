@@ -3,7 +3,7 @@ import cryptoJS from "crypto-js";
 import axios from "axios";
 
 import Reducer from "./reducer";
-//b3b93acc
+//AIzaSyBy9oM-nRs29vUW6OBvVxZhcyVaSOyjLn8
 const API = `https://www.googleapis.com/books/v1/volumes?`;
 const INITIAL_STATE = {
   isLoading: false,
@@ -21,7 +21,9 @@ export const GooglebooksContextProvider = ({ children }) => {
     try {
       const response = await axios.get(api);
       const data = response.data;
-      console.log(data);
+      console.log(Object.keys(data.items[0].volumeInfo).length);
+      console.log(Object.keys(data.items[1].volumeInfo).length);
+      console.log(Object.keys(data.items[2].volumeInfo).length);
       if (data.items) {
         dispatch({
           type: "GET_BOOKS",

@@ -1,5 +1,6 @@
 const cryptoJS = require("crypto-js");
 const AWS = require("aws-sdk");
+const sgMail = require("@sendgrid/mail");
 const jwt = require("jsonwebtoken");
 const stripe = require("../../helpers/stripe");
 const { validationResult } = require("express-validator");
@@ -11,12 +12,7 @@ const {
   forgotPasswordParams,
 } = require("../../helpers/email");
 
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  sercretKeyId: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION,
-});
-const ses = new AWS.SES({ apiVersion: "2010-12b-01" });
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 exports.userRegister = async (req, res, next) => {
   try {
     const validationErrors = validationResult(req);
@@ -37,11 +33,18 @@ exports.userRegister = async (req, res, next) => {
         expiresIn: "10m",
       }
     );
-    const params = registerEmailParams(email, token);
+    const msg = {
+      to: email,
+      from: "microsaas.kishalaydev22@gmail.com",
+      subject: "Email verification link",
+      text: `Vefiry your email address Please use the following link to complete your registration:${process.env.CLIENT_URL}/auth/activate/${token}`,
+
+      html: `<html><h1>Vefiry your email address</h1><p>Please use the following link to complete your registration:</p><p>${process.env.CLIENT_URL}/auth/activate/${token}</p></html>`,
+    };
 
     const sendEmail = async () => {
       try {
-        const data = await ses.sendEmail(params).promise();
+        const data = await sgMail.send(msg);
         console.log(`email submitted to SES`, data);
         res.status(200).send("Email has been sent to complete Registration");
       } catch (e) {
@@ -73,7 +76,7 @@ exports.registerActivate = async (req, res, next) => {
     const saveUser = async () => {
       try {
         const customer = await stripe.customers.create({
-          email,
+          name: username,
         });
         console.log(customer.id);
         const newUser = new User({
@@ -213,14 +216,20 @@ exports.forgotPassword = async (req, res, next) => {
       expiresIn: "10m",
     }
   );
-  const params = forgotPasswordParams(email, token);
+  const msg = {
+    to: "kishalaydev22@gmail.com",
+    from: "microsaas.kishalaydev22@gmail.com",
+    subject: "Password Reset Link",
+    text: `Please use the following link reset your password:${process.env.CLIENT_URL}/auth/activate/password/reset/${token}`,
+    html: `<html><h1>Reset password Link</h1><p>Please use the following link reset your password:</p><p>${process.env.CLIENT_URL}/auth/activate/password/reset/${token}</p></html>`,
+  };
   await User.updateOne(
     { email: email },
     { $set: { resetPasswordLink: token } }
   );
   const sendEmail = async () => {
     try {
-      const data = await ses.sendEmail(params).promise();
+      const data = await sgMail.send(msg);
       console.log(`email submitted to SES`, data);
       res
         .status(200)

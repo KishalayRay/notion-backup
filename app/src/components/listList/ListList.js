@@ -17,31 +17,21 @@ import {
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
-
+import { useNavigate } from "react-router-dom";
 const List = () => {
-  const { auth } = useAuth();
+  const navigate = useNavigate();
+
   const axiosPrivate = useAxiosPrivate();
-  //const [proList, setProList] = useState([]);
-  //const [lists, setLists] = useState([]);
   const fetchProList = async () => {
     const response = await axiosPrivate.get(`/apilist/pro`);
     console.log(response.data);
     return response.data.data.api;
-    // setProList(response.data.data.api);
-    // console.log(response.data.data.api);
   };
 
   const fetchList = async () => {
     const response = await axiosPrivate.get(`/apilist/`);
     return response.data.data.api;
-    // setLists(response.data.data.api);
-    // console.log(response.data.data.api);
   };
-
-  // useEffect(() => {
-  //   fetchProList();
-  //   fetchList();
-  // }, []);
 
   const {
     isLoading: isLoadingPro,

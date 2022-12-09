@@ -29,6 +29,7 @@ export const GetApiAuth = async (apiAuth, axiosPrivate, dispatch) => {
     dispatch(getApiAuthSuccess(response.data.data.NotionApi));
   } catch (e) {
     console.log(e);
+
     dispatch(getApiAuthFailure);
   }
 };
@@ -40,6 +41,7 @@ export const DeleteApiAuth = async (apiAuth, axiosPrivate, dispatch) => {
     dispatch(deleteApiAuthSuccess());
   } catch (e) {
     console.log(e);
+
     dispatch(deleteApiAuthFailure);
   }
 };

@@ -45,9 +45,7 @@ const DB = process.env.MONGO_URI.replace("<password>", process.env.PASSWORD);
 //const DB = process.env.MONGO_URI;
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(DB, {
-      autoIndex: false,
-    });
+    const conn = await mongoose.connect(DB);
     console.log(`connetion succesful ${conn.connection.host}`);
   } catch (e) {
     console.log(e);

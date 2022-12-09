@@ -32,8 +32,6 @@ const Account = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const axiosPrivate = useAxiosPrivate();
-  // const [user, setUser] = useState({});
-  // const [subscription, setSubscription] = useState("");
   const navigate = useNavigate();
   const handleSubscription = async () => {
     const response = await axiosPrivate.post(`/subs/cancel`, {});
@@ -42,35 +40,16 @@ const Account = () => {
   };
   const fetchUser = async () => {
     const response = await axiosPrivate.get(`/auth/user`);
-    return response.data.data.user;
-    // console.log(response.data.data.user);
+    //console.log(response.data.data.user);
+    return response.data.data.user.username;
+
     // setUser(response.data.data.user);
   };
   const fetchSubscription = async () => {
     const response = await axiosPrivate.get(`/subs/subscription`);
-    if (!response.data.data.subscription.data.length) {
-      return "Free";
-      // setSubscription("Free");
-    }
-    if (response.data.data.subscription.data.length) {
-      if (
-        response.data.data.subscription.data[0].plan.nickname === "Pro" &&
-        response.data.data.subscription.data[0].status === "active"
-      ) {
-        // setSubscription(response.data.data.subscription.data[0].plan.nickname);
-        return response.data.data.subscription.data[0].plan.nickname;
-      } else {
-        // setSubscription("Free");
-        return "Free";
-      }
-    }
-
-    console.log(response.data);
+    return response.data.data.subscription;
   };
-  useEffect(() => {
-    fetchUser();
-    fetchSubscription();
-  }, []);
+
   const {
     isLoading: isLoadingUser,
     isError: isErrorUser,
@@ -103,13 +82,10 @@ const Account = () => {
           borderRadius="lg"
         >
           <Stack textAlign={"center"} p={6} align={"center"}>
-            <Avatar
-              alt={"Author"}
-              src="https://img.icons8.com/cotton/344/super-mario.png"
-            />
+            <Avatar alt={"Author"} name={user} />
             <Stack direction={"column"} spacing={0} fontSize={"sm"}>
-              <Text fontWeight={600}>{user.username}</Text>
-              <Text color={"gray.500"}>{user.email}</Text>
+              <Text fontWeight={600}>{user}</Text>
+              <Text color={"gray.500"}></Text>
             </Stack>
           </Stack>
 

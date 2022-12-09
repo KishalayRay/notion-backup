@@ -7,6 +7,9 @@ import {
   createLeadStart,
   createLeadSuccess,
   createLeadFailure,
+  deleteLeadStart,
+  deleteLeadSuccess,
+  deleteLeadFailure,
 } from "./listActions";
 export const GetLeads = async (axiosPrivate, dispatch) => {
   dispatch(getLeadStart);
@@ -39,5 +42,17 @@ export const CreateLead = async (domain, axiosPrivate, dispatch) => {
   } catch (e) {
     console.log(e);
     dispatch(createLeadFailure);
+  }
+};
+export const DeleteLead = async (id, axiosPrivate, dispatch) => {
+  dispatch(deleteLeadStart);
+
+  try {
+    await axiosPrivate.put(`/hunter/${id}`, {});
+
+    dispatch(deleteLeadSuccess(id));
+  } catch (e) {
+    console.log(e);
+    dispatch(deleteLeadFailure);
   }
 };

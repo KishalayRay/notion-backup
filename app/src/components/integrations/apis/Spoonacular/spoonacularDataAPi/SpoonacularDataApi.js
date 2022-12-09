@@ -150,7 +150,7 @@ const Spoonacular = () => {
                             setIsDisabled(true);
                             setTimeout(() => {
                               setIsDisabled(false);
-                            }, 2000);
+                            }, 1000);
                           }}
                         >
                           Add

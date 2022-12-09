@@ -14,10 +14,9 @@ const googlebookSchema = new mongoose.Schema(
       required: true,
     },
     bookCategory: {
-      type: String,
+      type: Array,
       required: true,
     },
-
     bookAuthor: {
       type: String,
       required: true,

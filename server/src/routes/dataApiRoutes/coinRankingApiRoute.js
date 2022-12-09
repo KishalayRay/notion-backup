@@ -8,8 +8,8 @@ const {
   updateCoin,
   pageDetails,
 } = require("../../controllers/dataApiControllers/coinRankingApiController");
-const coinMiddleware = require("../../middlewares/dataApiMiddlewares/coinMiddleware");
-router.post("/newcoin", verify, coinMiddleware, createCoin);
+
+router.post("/newcoin", verify, createCoin);
 router.get("/coins", verify, getCoins);
 router.put("/:id", verify, deleteCoin);
 router.get("/", updateCoin);

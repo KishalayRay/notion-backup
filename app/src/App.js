@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./pages/routeHelpers/Layout";
@@ -32,6 +32,7 @@ import CaloriesBurnedDataApiContainer from "./components/integrations/apis/Calor
 import BigPictureContainer from "./components/integrations/apis/Bigpicture/BigPictureContainer";
 import BigPictureDataApiContainer from "./components/integrations/apis/Bigpicture/BigPictureDataApi/BigPictureDataApiContainer";
 import HunterContainer from "./components/integrations/apis/Hunter/HunterContainer";
+import HunterDataApiContainer from "./components/integrations/apis/Hunter/HunterDataApi/HunterDataApiContainer";
 import CoinRankingContainer from "./components/integrations/apis/CoinRanking/CoinRankingContainer";
 import CoinRankingApiContainer from "./components/integrations/apis/CoinRanking/CoinRankingApi/CoinRankingApiContainer";
 import TriposoContainer from "./components/integrations/apis/Triposo/TriposoContainer";
@@ -42,11 +43,10 @@ import PageNotFound from "./pages/error/PageNotFound";
 import RequireAuth from "./pages/routeHelpers/RequireAuth";
 import PersistLogin from "./pages/routeHelpers/PersistLogin";
 import useAuth from "./hooks/useAuth";
-const App = () => {
-  const { auth } = useAuth();
-  const state = localStorage.getItem("userEmail");
-  console.log(state, "state", !state);
 
+const App = () => {
+  const state = window.localStorage.getItem("userEmail");
+  console.log(state, "state", !state);
   return (
     <Routes>
       <Route
@@ -93,7 +93,7 @@ const App = () => {
             <Route
               path="apis"
               element={
-                state ? <ListListContainer /> : <Navigate replace to="/" />
+                state ? <ListListContainer /> : <Navigate replace to={"/"} />
               }
             />
 
@@ -200,6 +200,12 @@ const App = () => {
               path="integrations/Hunter"
               element={
                 state ? <HunterContainer /> : <Navigate replace to="/" />
+              }
+            />
+            <Route
+              path="integrations/Hunter/apiImport"
+              element={
+                state ? <HunterDataApiContainer /> : <Navigate replace to="/" />
               }
             />
 

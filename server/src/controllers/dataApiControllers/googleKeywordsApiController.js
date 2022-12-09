@@ -1,7 +1,7 @@
 const googleKeyword = require("../../models/GoogleKeyword");
 const NotionApiKey = require("../../models/NotionKey");
 const Apikey = require("../../models/ApiKey");
-const { Client } = require("@notionhq/client");
+const { Client, APIErrorCode } = require("@notionhq/client");
 const { createError } = require("../../utils/error");
 const SerpApi = require("google-search-results-nodejs");
 exports.createKeyword = async (req, res, next) => {
@@ -48,15 +48,7 @@ exports.createKeyword = async (req, res, next) => {
     const notion = new Client({
       auth: notionKey,
     });
-    const retrieveDatabase = async () => {
-      const response = await notion.databases.retrieve({
-        database_id: dataBaseId,
-      });
-      if (response === null) {
-        return next(createError(400, "Notion Database not found"));
-      }
-    };
-    retrieveDatabase();
+
     const apikey = await Apikey.findOne(
       {
         $and: [
@@ -75,39 +67,47 @@ exports.createKeyword = async (req, res, next) => {
       data_type: "RELATED_QUERIES",
     };
 
-    // const callback = function (data) {
-    //   console.log(data["jobs_results"]);
-    // };
-
-    // Show result as JSON
     search.json(params, (data) => {
       const keywords = data["related_queries"];
       const keywordArray = [...keywords.rising, ...keywords.top];
       keywordArray.map(async (keyword) => {
-        await notion.pages.create({
-          parent: {
-            database_id: dataBaseId,
-          },
-          properties: {
-            Keyword: {
-              title: [
-                {
-                  text: {
-                    content: keyword.query,
+        try {
+          await notion.pages.create({
+            parent: {
+              database_id: dataBaseId,
+            },
+            properties: {
+              Keywords: {
+                title: [
+                  {
+                    text: {
+                      content: keyword.query,
+                    },
                   },
-                },
-              ],
-            },
-            Volume: {
-              number: keyword.extracted_value,
-            },
-            Date: {
-              date: {
-                start: currDate,
+                ],
+              },
+              Volume: {
+                number: keyword.extracted_value,
+              },
+              "Original Keyword": {
+                rich_text: [
+                  {
+                    text: {
+                      content: req.body.keyword,
+                    },
+                  },
+                ],
               },
             },
-          },
-        });
+          });
+        } catch (err) {
+          if (err.code === APIErrorCode.ObjectNotFound) {
+            return next(createError(400, "Notion Error"));
+          } else {
+            // Other error handling code
+            return next(createError(400, "Notion Error"));
+          }
+        }
       });
     });
 

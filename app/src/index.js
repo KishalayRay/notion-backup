@@ -35,7 +35,8 @@ import { CaloriesBurnedContextProvider } from "./components/integrations/apis/Ca
 import { CaloriesBurnedlistContextProvider } from "./components/integrations/apis/CaloriesBurned/caloriesBurnedlistContext/listContext";
 import { BigPictureContextProvider } from "./components/integrations/apis/Bigpicture/context/context";
 import { BigPicturelistContextProvider } from "./components/integrations/apis/Bigpicture/BigPicturelistContext/listContext";
-import { HunterContextProvider } from "./components/integrations/apis/Hunter/HunterContext/listContext";
+import { HunterContextProvider } from "./components/integrations/apis/Hunter/context/context";
+import { HunterlistContextProvider } from "./components/integrations/apis/Hunter/HunterContext/listContext";
 import { CoinRankingContextProvider } from "./components/integrations/apis/CoinRanking/context/context";
 import { CoinRankinglistContextProvider } from "./components/integrations/apis/CoinRanking/CoinRankinglistContext/listContext";
 import { TriposoContextProvider } from "./components/integrations/apis/Triposo/context/context";
@@ -68,22 +69,24 @@ root.render(
                                               <BigPictureContextProvider>
                                                 <BigPicturelistContextProvider>
                                                   <HunterContextProvider>
-                                                    <CoinRankingContextProvider>
-                                                      <CoinRankinglistContextProvider>
-                                                        <TriposoContextProvider>
-                                                          <TriposolistContextProvider>
-                                                            <Routes>
-                                                              <Route
-                                                                path="/*"
-                                                                element={
-                                                                  <App />
-                                                                }
-                                                              />
-                                                            </Routes>
-                                                          </TriposolistContextProvider>
-                                                        </TriposoContextProvider>
-                                                      </CoinRankinglistContextProvider>
-                                                    </CoinRankingContextProvider>
+                                                    <HunterlistContextProvider>
+                                                      <CoinRankingContextProvider>
+                                                        <CoinRankinglistContextProvider>
+                                                          <TriposoContextProvider>
+                                                            <TriposolistContextProvider>
+                                                              <Routes>
+                                                                <Route
+                                                                  path="/*"
+                                                                  element={
+                                                                    <App />
+                                                                  }
+                                                                />
+                                                              </Routes>
+                                                            </TriposolistContextProvider>
+                                                          </TriposoContextProvider>
+                                                        </CoinRankinglistContextProvider>
+                                                      </CoinRankingContextProvider>
+                                                    </HunterlistContextProvider>
                                                   </HunterContextProvider>
                                                 </BigPicturelistContextProvider>
                                               </BigPictureContextProvider>

@@ -2,7 +2,7 @@ const Googlebooks = require("../../models/Googlebooks");
 const cryptoJS = require("crypto-js");
 const NotionApiKey = require("../../models/NotionKey");
 const NotionGooglebooksPage = require("../../models/NotionGooglebooksPage");
-const { Client } = require("@notionhq/client");
+const { Client, APIErrorCode } = require("@notionhq/client");
 const { createError } = require("../../utils/error");
 
 exports.createBook = async (req, res, next) => {
@@ -14,8 +14,7 @@ exports.createBook = async (req, res, next) => {
     if (book) {
       return next(createError(400, "Data already Inserted"));
     }
-
-    const update = {
+    const updateBody = {
       $set: {
         bookId: req.body.bookId,
         bookTitle: req.body.bookTitle,
@@ -29,7 +28,7 @@ exports.createBook = async (req, res, next) => {
 
     const bookupdate = await Googlebooks.updateOne(
       { bookId: req.body.bookId },
-      update,
+      updateBody,
       {
         upsert: true,
       }
@@ -54,84 +53,108 @@ exports.createBook = async (req, res, next) => {
     const notion = new Client({
       auth: notionKey,
     });
-    const retrieveDatabase = async () => {
-      const response = await notion.databases.retrieve({
-        database_id: dataBaseId,
-      });
-
-      if (response === null) {
-        return next(createError(400, "Notion Database not found"));
-      }
-    };
-    retrieveDatabase();
 
     const main = async () => {
-      const response = await notion.pages.create({
-        parent: {
-          database_id: dataBaseId,
-        },
-        properties: {
-          Title: {
-            title: [
-              {
-                text: {
-                  content: req.body.bookTitle,
+      try {
+        const response = await notion.pages.create({
+          parent: {
+            database_id: dataBaseId,
+          },
+          properties: {
+            Title: {
+              title: [
+                {
+                  text: {
+                    content: req.body.bookTitle,
+                  },
                 },
-              },
-            ],
-          },
-          Cover: {
-            files: [
-              {
-                type: "external",
-                name: "book cover",
-                external: {
-                  url: req.body.bookCover,
+              ],
+            },
+            Subtitle: {
+              rich_text: [
+                {
+                  type: "text",
+                  text: {
+                    content: req.body.bookSubtitle || "no subtitle",
+                  },
                 },
-              },
-            ],
-          },
-          Category: {
-            multi_select: [
-              {
-                name: req.body.bookCategory,
-              },
-            ],
-          },
-          "Page No": {
-            number: req.body.bookPage,
-          },
-          Author: {
-            rich_text: [
-              {
-                type: "text",
-                text: {
-                  content: req.body.bookAuthor,
+              ],
+            },
+            Summary: {
+              rich_text: [
+                {
+                  type: "text",
+                  text: {
+                    content:
+                      req.body.bookDescription
+                        .replace(/(<([^>]+)>)/gi, "")
+                        .slice(0, 1995) || "no summary",
+                  },
                 },
-              },
-            ],
+              ],
+            },
+            Cover: {
+              files: [
+                {
+                  type: "external",
+                  name: "book cover",
+                  external: {
+                    url: req.body.bookCover,
+                  },
+                },
+              ],
+            },
+            Category: {
+              multi_select: req.body.bookCategory.map((category) => {
+                return {
+                  name: category,
+                };
+              }),
+            },
+            Pages: {
+              number: req.body.bookPage,
+            },
+            Author: {
+              rich_text: [
+                {
+                  type: "text",
+                  text: {
+                    content: req.body.bookAuthor,
+                  },
+                },
+              ],
+            },
           },
-        },
-      });
-      const body = {
-        bookId: req.body.bookId,
-        pageId: response.id,
-      };
-      const update = {
-        $set: { user: req.user.id },
-        $push: { associateIds: body },
-      };
-      const createPage = await NotionGooglebooksPage.updateOne(
-        { user: req.user.id },
-        update,
-        {
-          upsert: true,
+        });
+
+        const body = {
+          bookId: req.body.bookId,
+          pageId: response.id,
+        };
+        const update = {
+          $set: { user: req.user.id },
+          $push: { associateIds: body },
+        };
+        const createPage = await NotionGooglebooksPage.updateOne(
+          { user: req.user.id },
+          update,
+          {
+            upsert: true,
+          }
+        );
+        console.log(createPage);
+      } catch (err) {
+        if (err.code === APIErrorCode.ObjectNotFound) {
+          return next(createError(400, "Notion Error"));
+        } else {
+          // Other error handling code
+          return next(createError(400, "Notion Error"));
         }
-      );
-      console.log(createPage);
+      }
     };
 
     main();
+
     res.status(200).json({
       data: {
         message: "Data Inserted to mongodb",
@@ -191,7 +214,7 @@ exports.deleteBook = async (req, res, next) => {
       },
       { associateIds: { $elemMatch: { bookId: bookID } } }
     );
-    console.log(pageDetail.associateIds[0].pageId);
+
     const notionCredential = await NotionApiKey.findOne(
       {
         $and: [{ user: req.user.id }, { "credentials.apiSlug": "Googlebooks" }],

@@ -5,12 +5,12 @@ const INITIAL_STATE = {
   isFetching: false,
   error: false,
 };
-export const HunterContext = createContext(INITIAL_STATE);
+export const HunterlistContext = createContext(INITIAL_STATE);
 
-export const HunterContextProvider = ({ children }) => {
+export const HunterlistContextProvider = ({ children }) => {
   const [state, dispatch] = useReducer(HunterReducer, INITIAL_STATE);
   return (
-    <HunterContext.Provider
+    <HunterlistContext.Provider
       value={{
         leads: state.leads,
         isFetching: state.isFetching,
@@ -19,6 +19,6 @@ export const HunterContextProvider = ({ children }) => {
       }}
     >
       {children}
-    </HunterContext.Provider>
+    </HunterlistContext.Provider>
   );
 };

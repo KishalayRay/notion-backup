@@ -32,25 +32,25 @@ export const CreateNews = async (countryCode, axiosPrivate, dispatch) => {
     const apiKey = res.data.data.ApiKey.keys[0].key;
 
     const response = await axios.get(
-      `https://api.thenewsapi.com/v1/news/top?api_token=${apiKey}&locale=${countryCode}`
+      `https://newsdata.io/api/1/news?apikey=${apiKey}&country=${countryCode}`
     );
-    const news = response.data.data;
+    const news = response.data.results;
     console.log(news);
     news.map(async (bulletin) => {
       const newsObject = {
-        country: bulletin.locale,
+        country: countryCode,
         title: bulletin.title,
-        snippet: bulletin.snippet,
-        time: new Date(bulletin.published_at),
-        url: bulletin.url,
+        snippet: bulletin.description,
+        time: bulletin.pubDate,
+        url: bulletin.link,
       };
 
       const postData = await axiosPrivate.post(`/thenewsapi/newnews`, {
-        country: bulletin.locale,
+        country: countryCode,
         title: bulletin.title,
-        snippet: bulletin.snippet,
-        time: bulletin.published_at,
-        url: bulletin.url,
+        snippet: bulletin.description,
+        time: bulletin.pubDate,
+        url: bulletin.link,
       });
       console.log(postData.data);
       console.log(newsObject);

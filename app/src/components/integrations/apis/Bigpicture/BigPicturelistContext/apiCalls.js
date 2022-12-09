@@ -42,7 +42,7 @@ export const CreateCompany = async (domain, axiosPrivate, dispatch) => {
     console.log(company);
     const companyObject = {
       company: company.legalName,
-      sector: company.tags[0],
+      sector: company.tags,
       site: company.url,
     };
 

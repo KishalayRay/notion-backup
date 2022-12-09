@@ -24,13 +24,24 @@ import useAxiosPrivate from "../../../../hooks/useAxiosPrivate";
 
 import { GoogleKeywordContext } from "./GoogleKeywordContext/listContext";
 import { DeleteIcon } from "@chakra-ui/icons";
-import { GetKeywords, CreateKeyword } from "./GoogleKeywordContext/apiCalls";
+import {
+  GetKeywords,
+  CreateKeyword,
+  DeleteKeyword,
+} from "./GoogleKeywordContext/apiCalls";
 
 const GoogleKeyword = () => {
   const axiosPrivate = useAxiosPrivate();
   const { dispatch, keywords } = useContext(GoogleKeywordContext);
   const [keyword, setKeyword] = useState("");
   const [load, setLoad] = useState(false);
+  const [loadD, setLoadD] = useState(false);
+  const handleDelete = async (id) => {
+    setLoadD(true);
+    console.log(id);
+    await DeleteKeyword(id, axiosPrivate, dispatch);
+    setLoadD(false);
+  };
   useEffect(() => {
     GetKeywords(axiosPrivate, dispatch);
   }, [dispatch]);
@@ -123,7 +134,11 @@ const GoogleKeyword = () => {
                       <Td>{query.keyword}</Td>
                       <Td>{query.date.substring(0, 10)}</Td>
                       <Td>
-                        <Button size="sm">
+                        <Button
+                          size="sm"
+                          isLoading={loadD ? true : false}
+                          onClick={() => handleDelete(query._id)}
+                        >
                           {" "}
                           <DeleteIcon />
                         </Button>

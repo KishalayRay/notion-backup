@@ -5,7 +5,15 @@ const RequireAuth = () => {
   const { auth } = useAuth();
   console.log(auth, auth?.accessToken, "requireAuth");
   const location = useLocation();
-  return <>{auth ? <Outlet /> : <Navigate to="/" />}</>;
+  return (
+    <>
+      {auth ? (
+        <Outlet />
+      ) : (
+        <Navigate to="/" state={{ from: location }} replace />
+      )}
+    </>
+  );
 };
 
 export default RequireAuth;
