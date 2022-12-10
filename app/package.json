@@ -11,6 +11,7 @@
     "@emotion/styled": "^11.9.3",
     "@fontsource/open-sans": "^4.5.10",
     "@fontsource/raleway": "^4.5.9",
+    "@reduxjs/toolkit": "^1.9.1",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
@@ -27,8 +28,11 @@
     "react-icons": "^4.4.0",
     "react-jwt": "^1.1.6",
     "react-query": "^3.39.2",
+    "react-redux": "^8.0.5",
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
+    "rebass": "^4.0.7",
+    "redux": "^4.2.0",
     "uniqid": "^5.4.0",
     "uuid": "^9.0.0",
     "web-vitals": "^2.1.4"
@@ -54,5 +58,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/react-redux": "^7.1.24"
   }
 }

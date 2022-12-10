@@ -41,76 +41,88 @@ import { CoinRankingContextProvider } from "./components/integrations/apis/CoinR
 import { CoinRankinglistContextProvider } from "./components/integrations/apis/CoinRanking/CoinRankinglistContext/listContext";
 import { TriposoContextProvider } from "./components/integrations/apis/Triposo/context/context";
 import { TriposolistContextProvider } from "./components/integrations/apis/Triposo/TriposolistContext/listContext";
+
+import { configureStore } from "@reduxjs/toolkit";
+import { Provider } from "react-redux";
+import rootReducer from "./localstoragereducer/localstoragereducer";
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 const queryClient = new QueryClient();
+
+const store = configureStore({
+  reducer: rootReducer,
+});
+
 root.render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <ChakraProvider theme={myTheme}>
-          <AuthProvider>
-            <ApiAuthContextProvider>
-              <DataApiContextProvider>
-                <OmdbContextProvider>
-                  <OmdblistContextProvider>
-                    <StockDataContextProvider>
-                      <StockDatalistContextProvider>
-                        <UnsplashContextProvider>
-                          <CalendarificContextProvider>
-                            <GooglebooksContextProvider>
-                              <GooglebookslistContextProvider>
-                                <TheNewsApiContextProvider>
-                                  <SpoonacularContextProvider>
-                                    <SpoonacularlistContextProvider>
-                                      <CaloriesBurnedContextProvider>
-                                        <CaloriesBurnedlistContextProvider>
-                                          <GoogleJobsContextProvider>
-                                            <GoogleKeywordContextProvider>
-                                              <BigPictureContextProvider>
-                                                <BigPicturelistContextProvider>
-                                                  <HunterContextProvider>
-                                                    <HunterlistContextProvider>
-                                                      <CoinRankingContextProvider>
-                                                        <CoinRankinglistContextProvider>
-                                                          <TriposoContextProvider>
-                                                            <TriposolistContextProvider>
-                                                              <Routes>
-                                                                <Route
-                                                                  path="/*"
-                                                                  element={
-                                                                    <App />
-                                                                  }
-                                                                />
-                                                              </Routes>
-                                                            </TriposolistContextProvider>
-                                                          </TriposoContextProvider>
-                                                        </CoinRankinglistContextProvider>
-                                                      </CoinRankingContextProvider>
-                                                    </HunterlistContextProvider>
-                                                  </HunterContextProvider>
-                                                </BigPicturelistContextProvider>
-                                              </BigPictureContextProvider>
-                                            </GoogleKeywordContextProvider>
-                                          </GoogleJobsContextProvider>
-                                        </CaloriesBurnedlistContextProvider>
-                                      </CaloriesBurnedContextProvider>
-                                    </SpoonacularlistContextProvider>
-                                  </SpoonacularContextProvider>
-                                </TheNewsApiContextProvider>
-                              </GooglebookslistContextProvider>
-                            </GooglebooksContextProvider>
-                          </CalendarificContextProvider>
-                        </UnsplashContextProvider>
-                      </StockDatalistContextProvider>
-                    </StockDataContextProvider>
-                  </OmdblistContextProvider>
-                </OmdbContextProvider>
-              </DataApiContextProvider>
-            </ApiAuthContextProvider>
-          </AuthProvider>
-        </ChakraProvider>
-      </Router>
-    </QueryClientProvider>
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <ChakraProvider theme={myTheme}>
+            <AuthProvider>
+              <ApiAuthContextProvider>
+                <DataApiContextProvider>
+                  <OmdbContextProvider>
+                    <OmdblistContextProvider>
+                      <StockDataContextProvider>
+                        <StockDatalistContextProvider>
+                          <UnsplashContextProvider>
+                            <CalendarificContextProvider>
+                              <GooglebooksContextProvider>
+                                <GooglebookslistContextProvider>
+                                  <TheNewsApiContextProvider>
+                                    <SpoonacularContextProvider>
+                                      <SpoonacularlistContextProvider>
+                                        <CaloriesBurnedContextProvider>
+                                          <CaloriesBurnedlistContextProvider>
+                                            <GoogleJobsContextProvider>
+                                              <GoogleKeywordContextProvider>
+                                                <BigPictureContextProvider>
+                                                  <BigPicturelistContextProvider>
+                                                    <HunterContextProvider>
+                                                      <HunterlistContextProvider>
+                                                        <CoinRankingContextProvider>
+                                                          <CoinRankinglistContextProvider>
+                                                            <TriposoContextProvider>
+                                                              <TriposolistContextProvider>
+                                                                <Routes>
+                                                                  <Route
+                                                                    path="/*"
+                                                                    element={
+                                                                      <App />
+                                                                    }
+                                                                  />
+                                                                </Routes>
+                                                              </TriposolistContextProvider>
+                                                            </TriposoContextProvider>
+                                                          </CoinRankinglistContextProvider>
+                                                        </CoinRankingContextProvider>
+                                                      </HunterlistContextProvider>
+                                                    </HunterContextProvider>
+                                                  </BigPicturelistContextProvider>
+                                                </BigPictureContextProvider>
+                                              </GoogleKeywordContextProvider>
+                                            </GoogleJobsContextProvider>
+                                          </CaloriesBurnedlistContextProvider>
+                                        </CaloriesBurnedContextProvider>
+                                      </SpoonacularlistContextProvider>
+                                    </SpoonacularContextProvider>
+                                  </TheNewsApiContextProvider>
+                                </GooglebookslistContextProvider>
+                              </GooglebooksContextProvider>
+                            </CalendarificContextProvider>
+                          </UnsplashContextProvider>
+                        </StockDatalistContextProvider>
+                      </StockDataContextProvider>
+                    </OmdblistContextProvider>
+                  </OmdbContextProvider>
+                </DataApiContextProvider>
+              </ApiAuthContextProvider>
+            </AuthProvider>
+          </ChakraProvider>
+        </Router>
+      </QueryClientProvider>
+    </Provider>
   </React.StrictMode>
 );
 
