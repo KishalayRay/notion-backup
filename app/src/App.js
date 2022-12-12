@@ -39,13 +39,17 @@ import TriposoContainer from "./components/integrations/apis/Triposo/TriposoCont
 import TriposoDataApiContainer from "./components/integrations/apis/Triposo/TriposoDataApi/TriposoDataApiContainer";
 import AccountContainer from "./components/Account/AccountContainer";
 import PageNotFound from "./pages/error/PageNotFound";
+import { useDispatch, useSelector } from "react-redux";
+import { ltrue, lfalse } from "./localstoragereducer/localstoragereducer";
 
 import RequireAuth from "./pages/routeHelpers/RequireAuth";
 import PersistLogin from "./pages/routeHelpers/PersistLogin";
 import useAuth from "./hooks/useAuth";
 
 const App = () => {
-  const state = window.localStorage.getItem("userEmail");
+  const state = useSelector((state) => state.value);
+  const dispatch = useDispatch();
+  // const state = window.localStorage.getItem("userEmail");
   console.log(state, "state", !state);
   return (
     <Routes>

@@ -21,6 +21,11 @@ import { Link, useNavigate, useLocation, redirect } from "react-router-dom";
 //import { AuthContext } from "../../context/authContext/AuthContext";
 import axios from "../../api/axios";
 import useAuth from "../../hooks/useAuth";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  localstoragetrue,
+  localstoragefalse,
+} from "../../localstoragereducer/localstoragereducer";
 const Login = () => {
   //const { dispatch, isFetching, errors } = useContext(AuthContext);
   const { setAuth } = useAuth();
@@ -30,6 +35,9 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [load, setLoad] = useState(false);
+  const value = useSelector((state) => state.value);
+  const dispatch = useDispatch();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoad(true);
@@ -46,9 +54,11 @@ const Login = () => {
       });
 
       navigate(from, { replace: true });
+      dispatch(localstoragetrue());
     } catch (e) {
       console.log(e);
       setAuth({ message: "failed" });
+      dispatch(localstoragefalse());
     }
     setLoad(false);
   };
